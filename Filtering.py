@@ -24,11 +24,12 @@ class ParticleFilter:
         #Obseravtion data initalization
         self.observation_data = pd.read_csv(filePath); 
         self.observation_data =self.observation_data.to_numpy(); 
+        self.observation_data = np.delete(self.observation_data,0,1);
 
     def estimate_params(self): 
          for t in range(1): 
             self.propagate(); 
-            self.compute_temp_weights(t); 
+            #self.compute_temp_weights(t); 
 
 
 
@@ -40,22 +41,24 @@ class ParticleFilter:
                 temp = self.Propagrator.propagate(); 
                 self.particles[i][0]= temp[0]; 
                 self.dailyInfected[i] = temp[1]; 
-        #print((self.particles))
+        print((self.particles))
 
 
 
     #internal helper function to compute weights based on observations
     def compute_temp_weights(self,t):
         temp_weights = np.zeros(len(self.particles)); 
-        for j in range(len(self.observation_data)): 
+        for j in range(len(self.observation_data)):  
                 a = self.weights[j] * (self.dailyInfected[j] ** self.observation_data[t+1]); 
                 a = a/gamma(self.observation_data[t+1]); 
-                a = np.exp(-self.dailyInfected[j]); 
-                
+                a = a * np.exp(-self.dailyInfected[j]); 
+                a = a + 10 **-300;  
                 temp_weights[j] = a; 
 
 
         temp_weights = temp_weights/len(temp_weights); 
+        print(temp_weights); 
+
 
 
 
@@ -65,3 +68,11 @@ class ParticleFilter:
 
 
                  
+
+
+
+
+
+
+
+
