@@ -1,9 +1,11 @@
 import numpy as np; 
 import pandas as pd; 
 import NumericalPropagator; 
+from scipy.stats import poisson
 from scipy.special import gamma; 
 
 class ParticleFilter: 
+
     def __init__(self,initial_state,beta_prior,num_particles,filePath):
 
         #Particle and weight initialization
@@ -26,10 +28,12 @@ class ParticleFilter:
         self.observation_data =self.observation_data.to_numpy(); 
         self.observation_data = np.delete(self.observation_data,0,1);
 
+
+#calls all internal functions to estimate the parameters
     def estimate_params(self): 
          for t in range(1): 
             self.propagate(); 
-            #self.compute_temp_weights(t); 
+            self.resample_with_temp_weights(t); 
 
 
 
@@ -41,23 +45,42 @@ class ParticleFilter:
                 temp = self.Propagrator.propagate(); 
                 self.particles[i][0]= temp[0]; 
                 self.dailyInfected[i] = temp[1]; 
-        print((self.particles))
 
 
 
     #internal helper function to compute weights based on observations
     def compute_temp_weights(self,t):
         temp_weights = np.zeros(len(self.particles)); 
-        for j in range(len(self.observation_data)):  
-                a = self.weights[j] * (self.dailyInfected[j] ** self.observation_data[t+1]); 
-                a = a/gamma(self.observation_data[t+1]); 
-                a = a * np.exp(-self.dailyInfected[j]); 
-                a = a + 10 **-300;  
-                temp_weights[j] = a; 
+        for j in range(len(self.particles)):  
+            #temp_weights[j] = (self.weights[j] * (self.dailyInfected[j] ** self.observation_data[t+1])/gamma(self.observation_data[t+1])) * np.exp(-self.dailyInfected[j]);  
+            temp_weights[j] = self.weights[j] * poisson.pmf(self.observation_data[t+1],self.dailyInfected[j]);
+        temp_weights = temp_weights/sum(temp_weights); 
+        #print(self.particles); 
+
+        return temp_weights; 
+
+    #resample based on the temp weights that were computed
+    def resample_with_temp_weights(self,t): 
+
+        temp_weights = self.compute_temp_weights(t); 
+        #print((temp_weights));
+        indexes = np.zeros(len(self.particles));
+        for i in range(len(self.particles)):
+            indexes[i] = i;
+        new_particle_indexes = np.random.choice(a=indexes, size=len(self.particles), replace=True, p=temp_weights);
+        print(new_particle_indexes);
+
+        for i in range(len(self.particles)):
+            self.particles[i] = self.particles[int(new_particle_indexes[i])];
+
+        self.print_particles(); 
+
+    #function to print the particles in a human readable format
+    def print_particles(self):
+        for i in range(len(self.particles)): 
+            print(self.particles[i]); 
 
 
-        temp_weights = temp_weights/len(temp_weights); 
-        print(temp_weights); 
 
 
 
@@ -68,6 +91,14 @@ class ParticleFilter:
 
 
                  
+
+
+
+
+
+
+
+
 
 
 
