@@ -15,7 +15,7 @@ class one_step_propagator:
         S,I,R = state; 
 
         print(state); 
-
+        print(params);
         dS = -params[0]*S*I
         dI = params[0]*S*I-params[1]*I
         dR = params[1]*I
