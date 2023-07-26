@@ -12,8 +12,7 @@ def main():
                                   filePath="observations.csv");
 
     pf.estimate_params()
-
-
-
-
     
+
+if __name__ == "__main__":
+    main()
