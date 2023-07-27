@@ -27,16 +27,18 @@ class ParticleFilter:
 
         #Obseravtion data initalization
         self.observation_data = pd.read_csv(filePath); 
-        self.observation_data =self.observation_data.to_numpy(); 
+        self.observation_data = self.observation_data.to_numpy(); 
         self.observation_data = np.delete(self.observation_data,0,1);
 
 
 #calls all internal functions to estimate the parameters
-    def estimate_params(self): 
-         for t in range(1): 
+    def estimate_params(self,time): 
+         for t in range(time): 
             self.propagate(); 
-            self.resample_with_temp_weights(t); 
+            temp_weights =  self.resample_with_temp_weights(t); 
+            #print(temp_weights);
             self.random_perturbations(); 
+            self.norm_likelihood(t,temp_weights);
 
     #internal helper function to propagate the particle cloud
     def propagate(self): 
@@ -44,7 +46,7 @@ class ParticleFilter:
                 self.Propagrator.params = [self.particles[i][1],self.gamma];
                 self.Propagrator.state = self.particles[i][0]; 
                 temp = self.Propagrator.propagate(); 
-                self.particles[i][0]= temp[0]; 
+                self.particles[i][0]= np.array(temp[0]); 
                 self.dailyInfected[i] = temp[1]; 
 
     #internal helper function to compute weights based on observations
@@ -53,8 +55,10 @@ class ParticleFilter:
         for j in range(len(self.particles)):  
             #temp_weights[j] = (self.weights[j] * (self.dailyInfected[j] ** self.observation_data[t+1])/gamma(self.observation_data[t+1])) * np.exp(-self.dailyInfected[j]);  
             temp_weights[j] = self.weights[j] * poisson.pmf(self.observation_data[t+1],self.dailyInfected[j]);
+            if(temp_weights[j] == 0):
+                temp_weights[j] += 10**-300; 
+        
         temp_weights = temp_weights/sum(temp_weights); 
-        #print(self.particles); 
 
         return temp_weights; 
 
@@ -71,8 +75,9 @@ class ParticleFilter:
         for i in range(len(self.particles)):
             self.particles[i] = self.particles[int(new_particle_indexes[i])];
 
-        #self.print_particles(); 
+        return temp_weights;  
     
+    #applies the geometric random walk to the particles
     def random_perturbations(self):
         sigma1 = 0.01; 
         sigma2 = 0.1; 
@@ -82,9 +87,13 @@ class ParticleFilter:
                       [0,0,(sigma1)**2,0],
                       [0,0,0,(sigma2)**2],
         ]); 
-    
+        
+        
+
         for i in range(len(self.particles)):
-            print(self.particles[i]); 
+            
+            #print(self.particles[i]);
+
             temp = []; 
             for  j in range(len(self.particles[i][0])):
                 temp.append(self.particles[i][0][j]); 
@@ -100,10 +109,19 @@ class ParticleFilter:
                 perturbed[j] = perturbed[j] / s; 
                 perturbed[j] = perturbed[j] * self.population; 
             
+            self.particles[i] = [perturbed[0:3],perturbed[3]];
 
-            self.particles[i] = perturbed; 
-            print(self.particles[i]); 
-            print("\n");
+    
+            #print(self.particles[i]);
+
+    def norm_likelihood(self,t,_temp_weights):
+        new_temp_weights = np.zeros(len(_temp_weights));
+        print(_temp_weights);
+        for i in range(len(_temp_weights)): 
+            new_temp_weights[i] = poisson.pmf(self.observation_data[t+1],self.dailyInfected[i]);
+        new_temp_weights = new_temp_weights/sum(new_temp_weights); 
+        for i in range(len(_temp_weights)):
+            self.weights[i] = new_temp_weights[i]/_temp_weights[i]; 
 
 
     #function to print the particles in a human readable format

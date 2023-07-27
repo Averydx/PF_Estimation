@@ -11,7 +11,7 @@ def main():
                                   num_particles=1000, 
                                   filePath="observations.csv");
 
-    pf.estimate_params()
+    pf.estimate_params(50);
     
 
 if __name__ == "__main__":
