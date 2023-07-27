@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt;
 
 def main():
     state = [10000,10,0]; 
-    pf = Filtering.ParticleFilter(beta_prior=[0.,0.3],
+    pf = Filtering.ParticleFilter(beta_prior=[0.,0.5],
                                   initial_state=state,
                                   num_particles=1000, 
                                   filePath="observations.csv");
