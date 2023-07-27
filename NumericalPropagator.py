@@ -8,17 +8,18 @@ class one_step_propagator:
         self.state = None;
         self.params = None; 
 
-    def RHS(self,state,params):
+    def RHS(state,params):
     #params has all the parameters – beta, gamma
     #state is a numpy array
 
-        S,I,R = state; 
+        S,I,R = state;
+        N = S + I + R; 
 
-        print(state); 
-        print(params);
-        dS = -params[0]*S*I
-        dI = params[0]*S*I-params[1]*I
+        dS = -params[0]*(S*I)/N
+        dI = params[0]*S*I/N-params[1]*I
         dR = params[1]*I
+
+
 
         return np.array([dS,dI,dR])
     

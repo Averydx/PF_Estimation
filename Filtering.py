@@ -1,8 +1,7 @@
 import numpy as np; 
 import pandas as pd; 
 import NumericalPropagator; 
-from scipy.stats import poisson
-from scipy.special import gamma; 
+from scipy.stats import poisson;
 
 class ParticleFilter: 
 
@@ -14,6 +13,9 @@ class ParticleFilter:
         self.Propagrator = NumericalPropagator.one_step_propagator(initial_state);
         self.dailyInfected = np.zeros(shape=num_particles); 
         self.gamma = 0.04; 
+        self.population = sum(initial_state); 
+
+        
         for i in range(len(self.weights)): 
              self.weights[i] /= num_particles;  
         for i in range(num_particles): 
@@ -34,8 +36,7 @@ class ParticleFilter:
          for t in range(1): 
             self.propagate(); 
             self.resample_with_temp_weights(t); 
-
-
+            self.random_perturbations(); 
 
     #internal helper function to propagate the particle cloud
     def propagate(self): 
@@ -45,8 +46,6 @@ class ParticleFilter:
                 temp = self.Propagrator.propagate(); 
                 self.particles[i][0]= temp[0]; 
                 self.dailyInfected[i] = temp[1]; 
-
-
 
     #internal helper function to compute weights based on observations
     def compute_temp_weights(self,t):
@@ -68,12 +67,44 @@ class ParticleFilter:
         for i in range(len(self.particles)):
             indexes[i] = i;
         new_particle_indexes = np.random.choice(a=indexes, size=len(self.particles), replace=True, p=temp_weights);
-        print(new_particle_indexes);
 
         for i in range(len(self.particles)):
             self.particles[i] = self.particles[int(new_particle_indexes[i])];
 
-        self.print_particles(); 
+        #self.print_particles(); 
+    
+    def random_perturbations(self):
+        sigma1 = 0.01; 
+        sigma2 = 0.1; 
+
+        C = np.array([[((sigma1)**2)/self.population,0,0,0],
+                      [0,(sigma1)**2,0,0],
+                      [0,0,(sigma1)**2,0],
+                      [0,0,0,(sigma2)**2],
+        ]); 
+    
+        for i in range(len(self.particles)):
+            print(self.particles[i]); 
+            temp = []; 
+            for  j in range(len(self.particles[i][0])):
+                temp.append(self.particles[i][0][j]); 
+    
+            temp.append(self.particles[i][1]); 
+    
+
+            temp = np.log(temp); 
+            perturbed = np.random.multivariate_normal(mean = temp,cov = C);
+            perturbed = np.exp(perturbed); 
+            s = (sum(perturbed[0:3]));
+            for j in range(0,3):
+                perturbed[j] = perturbed[j] / s; 
+                perturbed[j] = perturbed[j] * self.population; 
+            
+
+            self.particles[i] = perturbed; 
+            print(self.particles[i]); 
+            print("\n");
+
 
     #function to print the particles in a human readable format
     def print_particles(self):
