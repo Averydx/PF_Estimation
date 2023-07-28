@@ -56,18 +56,18 @@ class ParticleFilter:
 
     #internal helper function to compute weights based on observations
     def compute_temp_weights(self,t):
-        temp_weights = np.zeros(len(self.particles)); 
+        temp_weights = np.ones(len(self.particles)); 
         for j in range(len(self.particles)):    
-            temp_weights[j] = poisson.pmf(self.observation_data[t+1],self.dailyInfected[j]);
+            temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
 
+            print(f"Weight: {temp_weights[j]}");
+            print(f"params: {self.particles[j][1]}"); 
+            print(f"Observation: {self.observation_data[t+1]}, Euler prediction: {self.dailyInfected[j]}\n");
+        
             if(temp_weights[j] == 0):
-                temp_weights[j] += 10**-300; 
-        
+                temp_weights[j] = 10**-300;
 
-        print(temp_weights);
-        print('\n');
         temp_weights = temp_weights/sum(temp_weights); 
-        
 
         return temp_weights; 
 
@@ -75,7 +75,6 @@ class ParticleFilter:
     def resample_with_temp_weights(self,t): 
 
         temp_weights = self.compute_temp_weights(t); 
-        #print((temp_weights));
         indexes = np.zeros(len(self.particles));
         for i in range(len(self.particles)):
             indexes[i] = i;
@@ -101,7 +100,6 @@ class ParticleFilter:
 
         for i in range(len(self.particles)):
             
-            # print(self.particles[i]);
 
             temp = []; 
             for  j in range(len(self.particles[i][0])):
@@ -119,8 +117,6 @@ class ParticleFilter:
             
             self.particles[i] = [perturbed[0:3],perturbed[3]];
     
-            # print(self.particles[i]);
-            # print("\n");
 
     #function to print the particles in a human readable format
     def print_particles(self):
