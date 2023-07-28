@@ -13,12 +13,12 @@ class one_step_propagator:
     #state is a numpy array
 
         S,I,R = state;
+        N = S + I + R; 
 
+        new_I = params[0]*S*I/N;
 
-        new_I = params[0]*S*I/10100;
-
-        dS = -params[0]*(S*I)/10100
-        dI = params[0]*S*I/10100-params[1]*I
+        dS = -params[0]*(S*I)/N
+        dI = params[0]*S*I/N-params[1]*I
         dR = params[1]*I
 
 
@@ -41,11 +41,13 @@ class one_step_propagator:
 
             dt,new_I = self.RHS(sol[:,i],self.params)
             dailyInfected =  new_I/NperDay;
-            print(dailyInfected);
             sol[:,i+1] = sol[:,i] + dt/NperDay;
 
-        return sol[:,-1],dailyInfected;
+        print(self.params);
+        print(dailyInfected);
+        print('\n');
 
+        return sol[:,-1],dailyInfected;
 
 
     def propagate(self): 
