@@ -38,7 +38,6 @@ class ParticleFilter:
             temp_weights =  self.resample_with_temp_weights(t); 
             #print(temp_weights);
             self.random_perturbations(); 
-            self.norm_likelihood(t,temp_weights);
 
     #internal helper function to propagate the particle cloud
     def propagate(self): 
@@ -113,15 +112,6 @@ class ParticleFilter:
 
     
             #print(self.particles[i]);
-
-    def norm_likelihood(self,t,_temp_weights):
-        new_temp_weights = np.zeros(len(_temp_weights));
-        print(_temp_weights);
-        for i in range(len(_temp_weights)): 
-            new_temp_weights[i] = poisson.pmf(self.observation_data[t+1],self.dailyInfected[i]);
-        new_temp_weights = new_temp_weights/sum(new_temp_weights); 
-        for i in range(len(_temp_weights)):
-            self.weights[i] = new_temp_weights[i]/_temp_weights[i]; 
 
 
     #function to print the particles in a human readable format
