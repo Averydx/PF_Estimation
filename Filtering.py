@@ -33,9 +33,7 @@ class ParticleFilter:
 
 #calls all internal functions to estimate the parameters
     def estimate_params(self,time): 
-        betas = [];
-        for t in range(time): 
-        betas = [];
+        betas = [];5
         for t in range(time): 
             self.propagate(); 
             temp_weights =  self.resample_with_temp_weights(t); 
