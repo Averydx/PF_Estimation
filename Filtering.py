@@ -35,6 +35,8 @@ class ParticleFilter:
     def estimate_params(self,time): 
         betas = [];
         for t in range(time): 
+        betas = [];
+        for t in range(time): 
             self.propagate(); 
             temp_weights =  self.resample_with_temp_weights(t); 
             self.random_perturbations(); 
@@ -68,6 +70,7 @@ class ParticleFilter:
                 temp_weights[j] = 10**-300;
 
         temp_weights = temp_weights/sum(temp_weights); 
+        
 
         return temp_weights; 
 
