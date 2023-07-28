@@ -33,31 +33,41 @@ class ParticleFilter:
 
 #calls all internal functions to estimate the parameters
     def estimate_params(self,time): 
-         for t in range(time): 
+        betas = [];
+        for t in range(time): 
             self.propagate(); 
             temp_weights =  self.resample_with_temp_weights(t); 
-            #print(temp_weights);
             self.random_perturbations(); 
+            mean = 0;
+            for i in range(len(self.particles)):
+                mean += self.particles[i][1]; 
+            mean /= len(self.particles);
+            betas.append(mean);
+        return betas; 
 
     #internal helper function to propagate the particle cloud
     def propagate(self): 
         for i in range(len(self.particles)): 
                 self.Propagrator.params = [self.particles[i][1],self.gamma];
                 self.Propagrator.state = self.particles[i][0]; 
-                temp = self.Propagrator.propagate(); 
+                temp = self.Propagrator.propagate_euler(); 
                 self.particles[i][0]= np.array(temp[0]); 
                 self.dailyInfected[i] = temp[1]; 
 
     #internal helper function to compute weights based on observations
     def compute_temp_weights(self,t):
         temp_weights = np.zeros(len(self.particles)); 
-        for j in range(len(self.particles)):  
-            #temp_weights[j] = (self.weights[j] * (self.dailyInfected[j] ** self.observation_data[t+1])/gamma(self.observation_data[t+1])) * np.exp(-self.dailyInfected[j]);  
-            temp_weights[j] = self.weights[j] * poisson.pmf(self.observation_data[t+1],self.dailyInfected[j]);
+        for j in range(len(self.particles)):    
+            temp_weights[j] = poisson.pmf(self.observation_data[t+1],self.dailyInfected[j]);
+
             if(temp_weights[j] == 0):
                 temp_weights[j] += 10**-300; 
         
+
+        print(temp_weights);
+        print('\n');
         temp_weights = temp_weights/sum(temp_weights); 
+        
 
         return temp_weights; 
 
@@ -91,7 +101,7 @@ class ParticleFilter:
 
         for i in range(len(self.particles)):
             
-            #print(self.particles[i]);
+            # print(self.particles[i]);
 
             temp = []; 
             for  j in range(len(self.particles[i][0])):
@@ -99,7 +109,6 @@ class ParticleFilter:
     
             temp.append(self.particles[i][1]); 
     
-
             temp = np.log(temp); 
             perturbed = np.random.multivariate_normal(mean = temp,cov = C);
             perturbed = np.exp(perturbed); 
@@ -109,37 +118,14 @@ class ParticleFilter:
                 perturbed[j] = perturbed[j] * self.population; 
             
             self.particles[i] = [perturbed[0:3],perturbed[3]];
-
     
-            #print(self.particles[i]);
-
+            # print(self.particles[i]);
+            # print("\n");
 
     #function to print the particles in a human readable format
     def print_particles(self):
         for i in range(len(self.particles)): 
             print(self.particles[i]); 
-
-
-
-
-
-
-
-
-
-
-
-                 
-
-
-
-
-
-
-
-
-
-
 
 
 
