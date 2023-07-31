@@ -34,15 +34,13 @@ class ParticleFilter:
 #calls all internal functions to estimate the parameters
     def estimate_params(self,time): 
         betas = [];
+        betas.append(self.average_beta())
         for t in range(time): 
             self.propagate(); 
             temp_weights =  self.resample_with_temp_weights(t); 
             self.random_perturbations(); 
-            mean = 0;
-            for i in range(len(self.particles)):
-                mean += self.particles[i][1]; 
-            mean /= len(self.particles);
-            betas.append(mean);
+            self.norm_likelihood(temp_weights_old=temp_weights,t=t)
+            betas.append(self.average_beta());
         return betas; 
 
     #internal helper function to propagate the particle cloud
@@ -58,13 +56,17 @@ class ParticleFilter:
     def compute_temp_weights(self,t):
         temp_weights = np.ones(len(self.particles)); 
         for j in range(len(self.particles)):    
-            temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
+            temp_weights[j] = self.weights[j] * poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
 
             print(f"Weight: {temp_weights[j]}");
             print(f"params: {self.particles[j][1]}"); 
             print(f"Observation: {self.observation_data[t+1]}, Euler prediction: {self.dailyInfected[j]}\n");
         
             if(temp_weights[j] == 0):
+                temp_weights[j] = 10**-300;
+            elif(np.isnan(temp_weights[j])):
+                temp_weights[j] = 10**-300;
+            elif(np.isinf(temp_weights[j])):
                 temp_weights[j] = 10**-300;
 
         temp_weights = temp_weights/sum(temp_weights); 
@@ -118,12 +120,30 @@ class ParticleFilter:
             
             self.particles[i] = [perturbed[0:3],perturbed[3]];
             
+    #computes the normalized likelihood
+    def norm_likelihood(self,temp_weights_old,t):
+        temp_weights = np.zeros(len(self.particles)); 
+        for j in range(len(self.particles)): 
+            temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
+
+        temp_weights /= sum(temp_weights);
     
+        for j in range(len(self.particles)):
+            self.weights[j] = temp_weights[j]/temp_weights_old[j]; 
+
 
     #function to print the particles in a human readable format
     def print_particles(self):
         for i in range(len(self.particles)): 
             print(self.particles[i]); 
+
+    #average beta helper function
+    def average_beta(self): 
+        mean = 0;
+        for i in range(len(self.particles)):
+            mean += self.particles[i][1]; 
+        mean /= len(self.particles);
+        return(mean);
 
 
 
