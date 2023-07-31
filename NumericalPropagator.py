@@ -42,11 +42,7 @@ class one_step_propagator:
             dt,new_I = self.RHS(sol[:,i],self.params)
             dailyInfected =  new_I/NperDay;
             sol[:,i+1] = sol[:,i] + dt/NperDay;
-
-        print(self.params);
-        print(dailyInfected);
-        print('\n');
-
+        
         return sol[:,-1],dailyInfected;
 
 
