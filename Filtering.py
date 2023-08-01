@@ -34,14 +34,17 @@ class ParticleFilter:
 #calls all internal functions to estimate the parameters
     def estimate_params(self,time): 
         betas = [];
+        dI_average = []; 
         betas.append(self.average_beta())
+        dI_average.append(self.average_dI()); 
         for t in range(time): 
             self.propagate(); 
             temp_weights =  self.resample_with_temp_weights(t); 
             self.random_perturbations(); 
             self.norm_likelihood(temp_weights_old=temp_weights,t=t)
             betas.append(self.average_beta());
-        return betas; 
+            dI_average.append(self.average_dI()); 
+        return betas,dI_average; 
 
     #internal helper function to propagate the particle cloud
     def propagate(self): 
@@ -56,11 +59,10 @@ class ParticleFilter:
     def compute_temp_weights(self,t):
         temp_weights = np.ones(len(self.particles)); 
         for j in range(len(self.particles)):    
-            temp_weights[j] = self.weights[j] * poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
-
-            print(f"Weight: {temp_weights[j]}");
-            print(f"params: {self.particles[j][1]}"); 
-            print(f"Observation: {self.observation_data[t+1]}, Euler prediction: {self.dailyInfected[j]}\n");
+            temp_weights[j] =  poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
+            # print(f"Weight: {temp_weights[j]}");
+            # print(f"params: {self.particles[j][1]}"); 
+            # print(f"Observation: {self.observation_data[t+1]}, Euler prediction: {self.dailyInfected[j]}\n");
         
             if(temp_weights[j] == 0):
                 temp_weights[j] = 10**-300;
@@ -90,9 +92,12 @@ class ParticleFilter:
     
     #applies the geometric random walk to the particles
     def random_perturbations(self):
+
+        #sigma1 is the deviation of the state and sigma2 is the deviation of beta
         sigma1 = 0.01; 
         sigma2 = 0.1; 
-
+        
+        #for fixed beta use 0.4 and for variable use 0.014 
         C = np.array([[((sigma1)**2)/self.population,0,0,0],
                       [0,(sigma1)**2,0,0],
                       [0,0,(sigma1)**2,0],
@@ -100,7 +105,6 @@ class ParticleFilter:
         ]); 
         
         
-
         for i in range(len(self.particles)):
             
 
@@ -144,6 +148,9 @@ class ParticleFilter:
             mean += self.particles[i][1]; 
         mean /= len(self.particles);
         return(mean);
+
+    def average_dI(self): 
+        return np.mean(self.dailyInfected); 
 
 
 
