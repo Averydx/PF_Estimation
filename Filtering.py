@@ -5,23 +5,32 @@ from scipy.stats import poisson;
 
 class ParticleFilter: 
 
-    def __init__(self,initial_state,beta_prior,num_particles,filePath):
+    def __init__(self,population,beta_prior,num_particles,hyperparamters,filePath):
 
         #Particle and weight initialization
         self.particles = []; 
         self.weights = np.ones(shape=num_particles); 
-        self.Propagrator = NumericalPropagator.one_step_propagator(initial_state);
+        self.Propagrator = NumericalPropagator.one_step_propagator();
         self.dailyInfected = np.zeros(shape=num_particles); 
         self.gamma = 0.04; 
-        self.population = sum(initial_state); 
+        self.population = population; 
+        self.hyperparameters = hyperparamters;    
 
+
+        self.weights /= num_particles;  
         
-        for i in range(len(self.weights)): 
-             self.weights[i] /= num_particles;  
+
         for i in range(num_particles): 
+
+            initial_infected = np.random.uniform(0,self.population * 0.05); 
+
+            initial_state = [self.population-initial_infected,initial_infected,0]; 
+
             beta = (
                 np.random.uniform(low=beta_prior[0],
                                   high=beta_prior[1])); 
+            
+
             particle = [initial_state,beta]; 
             self.particles.append(particle); 
 
@@ -35,16 +44,22 @@ class ParticleFilter:
     def estimate_params(self,time): 
         betas = [];
         dI_average = []; 
+        qtls = []; 
         betas.append(self.average_beta())
         dI_average.append(self.average_dI()); 
         for t in range(time): 
             self.propagate(); 
             temp_weights =  self.resample_with_temp_weights(t); 
+
             self.random_perturbations(); 
+
+            qtls.append(self.quantiles()); 
+
             self.norm_likelihood(temp_weights_old=temp_weights,t=t)
+
             betas.append(self.average_beta());
             dI_average.append(self.average_dI()); 
-        return betas,dI_average; 
+        return betas,dI_average,np.array(qtls); 
 
     #internal helper function to propagate the particle cloud
     def propagate(self): 
@@ -60,9 +75,6 @@ class ParticleFilter:
         temp_weights = np.ones(len(self.particles)); 
         for j in range(len(self.particles)):    
             temp_weights[j] =  poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
-            # print(f"Weight: {temp_weights[j]}");
-            # print(f"params: {self.particles[j][1]}"); 
-            # print(f"Observation: {self.observation_data[t+1]}, Euler prediction: {self.dailyInfected[j]}\n");
         
             if(temp_weights[j] == 0):
                 temp_weights[j] = 10**-300;
@@ -94,8 +106,8 @@ class ParticleFilter:
     def random_perturbations(self):
 
         #sigma1 is the deviation of the state and sigma2 is the deviation of beta
-        sigma1 = 0.01; 
-        sigma2 = 0.1; 
+        sigma1 = self.hyperparameters[0]; 
+        sigma2 = self.hyperparameters[1]; 
         
         #for fixed beta use 0.4 and for variable use 0.014 
         C = np.array([[((sigma1)**2)/self.population,0,0,0],
@@ -135,7 +147,7 @@ class ParticleFilter:
         for j in range(len(self.particles)):
             self.weights[j] = temp_weights[j]/temp_weights_old[j]; 
 
-
+    
     #function to print the particles in a human readable format
     def print_particles(self):
         for i in range(len(self.particles)): 
@@ -149,9 +161,37 @@ class ParticleFilter:
         mean /= len(self.particles);
         return(mean);
 
+    #average betaSI\N helper function
     def average_dI(self): 
         return np.mean(self.dailyInfected); 
 
+    def quantiles(self): 
+        qtlMark = 1.00*np.array([0.010, 0.025, 0.050, 0.100, 0.150, 0.200, 0.250, 0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.800, 0.850, 0.900, 0.950, 0.975, 0.990]);
+        # I = []; 
+        # for particle in self.particles: 
+        #     I.append(particle[0][1]);  
+        return np.quantile(self.dailyInfected, qtlMark);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+                 
 
 
 
