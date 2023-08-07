@@ -4,7 +4,7 @@ import numpy as np;
 
 
 class one_step_propagator: 
-    def __init__(self,_state): 
+    def __init__(self): 
         self.state = None;
         self.params = None; 
 
@@ -72,8 +72,6 @@ class one_step_propagator:
 
         self.state = [S - tInf,I + tInf - tRem,R + tRem];
         return [self.state,tInf]; 
-
-
 
 
         
