@@ -17,9 +17,9 @@ class one_step_propagator:
 
         new_I = params[0]*S*I/N;
 
-        dS = -params[0]*(S*I)/N
+        dS = -params[0]*(S*I)/N + params[2] * R
         dI = params[0]*S*I/N-params[1]*I
-        dR = params[1]*I
+        dR = params[1]*I - params[2] * R; 
 
 
 
@@ -74,11 +74,4 @@ class one_step_propagator:
         return [self.state,tInf]; 
 
 
-        
-
-
-
-
-
-
-
+       
