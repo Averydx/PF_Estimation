@@ -1,71 +1,55 @@
-from matplotlib import cm
-import Filtering; 
-import pandas as pd; 
-import numpy as np; 
-import matplotlib.pyplot as plt; 
+from plotting import plot; 
+from Filtering import ParticleFilter; 
 import time; 
-import Datagen; 
+from Datagen import DataGenerator; 
+import numpy as np
+
+
+##Run cProfile and snakeviz to extract call stack runtime
+
 
 def main():
     start = time.time(); 
 
     def beta(t):
         
-      # betaMax1=0.8
-      # theta=0
+      betaMax1=0.8
+      theta=0
 
-      # return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi));  
-      return 0.1; 
-
-
+      return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi));  
+      #return 0.4; 
 
 
-    dg = Datagen.DataGenerator(beta,0.04,0.02,[10000 ,100,0],100,data_name="beta_test",noise=True); 
+    dg = DataGenerator(beta,0.04,0.02,[100000 ,100,0],100,data_name="beta_test",noise=True); 
 
     dg.generate_data(); 
     dg.plot_daily_infected(); 
-
     dg.plot_beta(); 
+    dg.plot_states(); 
 
-    #dg.plot_states(); 
+    #HOSPITALIZATION RATE FOR FLU IS 0.01
 
-    pf = Filtering.ParticleFilter(beta_prior=[0.,1.],
-                                  population=10100,
+    pf = ParticleFilter(beta_prior=[0.,1.],
+                                  population=100100,
                                   num_particles=5000, 
-                                  hyperparamters=[0.01,0.1 ,0.1],
+                                  hyperparamters=[0.01,0.1],
+                                  static_parameters=[0.04,0.02],
                                   filePath="beta_test.csv",
                                   estimate_gamma=False); 
         
 
     time_series = 99; 
-    betas,dI,qtls = pf.estimate_params(time_series);
+    out = pf.estimate_params(time_series);
     end = time.time();
 
+    print(out.average_infected); 
+
     print("The time of execution of the program is :",
-      (end-start), "s")
-    
-    t = np.linspace(0,time_series,num=time_series);
+      (end-start), "s") 
 
-    plt.figure(figsize=(20, 20))
-
-    colors = cm.plasma(np.linspace(0,1,12)); 
-
-    plt.plot(t,np.squeeze(pf.observation_data[:time_series]),color = "black",zorder=12); 
-
-    for i in range(11):
-      plt.fill_between(t, qtls[:,i], qtls[:,22-i], facecolor = colors[11-i], zorder = i);
-    
-    plt.xlabel("time(days)"); 
-    plt.ylabel("Number of Infections"); 
-    plt.title("Confidence Intervals"); 
-
-    plt.show();
-
-    plt.plot(t,dg.beta[0:time_series]); 
-    plt.plot(t,betas);
-
-    plt.show();   
-
+    plot(out,0);  
+    plot(out,1);   
+    plot(out,2); 
 
 
 
