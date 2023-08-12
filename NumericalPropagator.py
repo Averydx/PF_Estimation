@@ -47,8 +47,3 @@ class one_step_propagator:
             sol[:,i+1] = sol[:,i] + dt/NperDay;
         
         return sol[:,-1],dailyInfected;
-
-
-
-
-       

@@ -13,7 +13,7 @@ def main():
 
     def beta(t):
         
-      betaMax1=0.8
+      betaMax1=0.1
       theta=0
 
       return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi));  
@@ -31,7 +31,7 @@ def main():
 
     pf = ParticleFilter(beta_prior=[0.,1.],
                                   population=100100,
-                                  num_particles=5000, 
+                                  num_particles=1000, 
                                   hyperparamters=[0.01,0.1],
                                   static_parameters=[0.04,0.02],
                                   filePath="beta_test.csv",
@@ -41,8 +41,6 @@ def main():
     time_series = 99; 
     out = pf.estimate_params(time_series);
     end = time.time();
-
-    print(out.average_infected); 
 
     print("The time of execution of the program is :",
       (end-start), "s") 

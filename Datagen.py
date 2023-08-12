@@ -4,6 +4,13 @@ import matplotlib.pyplot as plt;
 
 class DataGenerator:
 
+    state : list
+    results: list 
+    dailyInfected: list 
+    beta: list
+    time: list 
+    data_name: str
+    noise: bool
 
     def __init__(self,_beta,_gamma,_eta,_initial_state,time_series,data_name,noise=False):
 

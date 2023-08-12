@@ -138,6 +138,8 @@ class ParticleFilter:
                 self.particles[i][0]= np.array(state); 
                 self.dailyInfected[i] = dailyInf; 
 
+
+
                 if(self.estimate_gamma): 
                     self.particles[i][1] = self.particles[i][1] * np.exp(self.hyperparameters[2] * np.random.normal(0,1)); 
 
@@ -145,12 +147,12 @@ class ParticleFilter:
     #internal helper function to compute weights based on observations
     def compute_temp_weights(self,t)->NDArray[np.float_]:
         temp_weights = np.ones(len(self.particles)); 
-        for j in range(len(self.particles)):    
-            temp_weights[j] = self.weights[j] *  poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
+          
+        temp_weights = self.weights *  poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected);
             #temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1], 0.01* self.particles[j][1]))
 
             #temp_weights[j] = self.weights[j] * (((self.dailyInfected[j])**(np.round(self.observation_data[t+1]))/gamma(np.round(self.observation_data[t+1]))) * np.exp(-self.dailyInfected[j])); 
-
+        for j in range(len(self.particles)):  
             if(temp_weights[j] == 0):
                 temp_weights[j] = 10**-300; 
             elif(np.isnan(temp_weights[j])):
@@ -187,11 +189,8 @@ class ParticleFilter:
         [sigma1,sigma2] = self.hyperparameters;  
         
         #for fixed beta use 0.4 and for variable use 0.014 
-        C = np.array([[((sigma1)**2)/self.population,0,0,0],
-                      [0,(sigma1)**2,0,0],
-                      [0,0,(sigma1)**2,0],
-                      [0,0,0,(sigma2)**2],
-        ]); 
+        C = np.diag([(sigma1)**2/self.population,sigma1**2,sigma1**2,sigma2**2]); 
+
         
         
         for i in range(len(self.particles)):
@@ -214,8 +213,8 @@ class ParticleFilter:
 
     def norm_likelihood(self,temp_weights_old,t)->None:
         temp_weights = np.zeros(len(self.particles)); 
-        for j in range(len(self.particles)): 
-            temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected[j]);
+        #for j in range(len(self.particles)): 
+        temp_weights = poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected);
             #temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1], 0.01* self.particles[j][1]))
 
         temp_weights /= np.sum(temp_weights);
@@ -249,7 +248,6 @@ class ParticleFilter:
 
 
                  
-
 
 
 
