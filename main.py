@@ -20,25 +20,30 @@ def main():
       #return 0.4; 
 
 
-    dg = DataGenerator(beta,0.04,0.02,[100000 ,100,0],100,data_name="beta_test",noise=True); 
+    params = {"beta":beta,"gamma":0.04,"eta":0.1,"hosp":5.3,"L":4.0,"D":90.0}
+    
+    initial_state = np.array([100000 ,1000,0])
+    time_series = 500; 
+    dg = DataGenerator(params,initial_state,time_series,data_name="beta_test",noise=True,hospitalization=False); 
 
     dg.generate_data(); 
     dg.plot_daily_infected(); 
     dg.plot_beta(); 
     dg.plot_states(); 
 
-    #HOSPITALIZATION RATE FOR FLU IS 0.01
+#     #HOSPITALIZATION RATE FOR FLU IS 0.01
 
     pf = ParticleFilter(beta_prior=[0.,1.],
-                                  population=100100,
+                                  population=101000,
                                   num_particles=1000, 
                                   hyperparamters=[0.01,0.1],
-                                  static_parameters=[0.04,0.02],
+                                  static_parameters=[0.04,0.1],
+                                  init_seed_percent=0.01,
                                   filePath="beta_test.csv",
                                   estimate_gamma=False); 
         
 
-    time_series = 99; 
+    time_series = 499; 
     out = pf.estimate_params(time_series);
     end = time.time();
 

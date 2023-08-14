@@ -2,6 +2,7 @@ import numpy as np;
 import pandas as pd; 
 import NumericalPropagator; 
 from scipy.stats import poisson;
+from scipy.stats import nbinom;
 from numpy.typing import NDArray
 
 class Output:
@@ -50,7 +51,7 @@ class ParticleFilter:
     estimate_gamma: bool
 
 
-    def __init__(self,population,beta_prior,num_particles,hyperparamters,static_parameters,filePath,estimate_gamma = False):
+    def __init__(self,population,beta_prior,num_particles,hyperparamters,static_parameters,init_seed_percent,filePath,estimate_gamma = False):
 
         #Particle and weight initialization
 
@@ -75,9 +76,9 @@ class ParticleFilter:
         self.weights /= num_particles;  
         
 
-        for i in range(num_particles): 
+        for _ in range(num_particles): 
 
-            initial_infected = np.random.uniform(0,self.population * 0.1); 
+            initial_infected = np.random.uniform(0,self.population * init_seed_percent); 
 
             initial_state = [self.population - initial_infected,initial_infected,0]; 
 
@@ -98,7 +99,7 @@ class ParticleFilter:
 
         #Obseravtion data initalization
         self.observation_data = pd.read_csv(filePath); 
-        self.observation_data = self.observation_data.to_numpy(); 
+        self.observation_data = np.squeeze(self.observation_data.to_numpy()); 
         self.observation_data = np.delete(self.observation_data,0,1);
 
 
@@ -115,9 +116,6 @@ class ParticleFilter:
             temp_weights =  self.resample_with_temp_weights(t); 
 
             self.random_perturbations(); 
-
-        
-
             self.norm_likelihood(temp_weights_old=temp_weights,t=t)
 
             self.out.average_beta(self.particles,t); 
@@ -130,18 +128,18 @@ class ParticleFilter:
 
     #internal helper function to propagate the particle cloud
     def propagate(self)->None: 
-        for i in range(len(self.particles)): 
+        for i,particle in enumerate(self.particles): 
                  
-                self.Propagator.params = [self.particles[i][1],self.static_parameters[0],self.static_parameters[1]];
-                self.Propagator.state = self.particles[i][0]; 
+                self.Propagator.params = [particle[1],self.static_parameters[0],self.static_parameters[1]];
+                self.Propagator.state = particle[0]; 
                 state,dailyInf = self.Propagator.propagate_euler(); 
-                self.particles[i][0]= np.array(state); 
+                particle[0]= np.array(state); 
                 self.dailyInfected[i] = dailyInf; 
 
 
 
                 if(self.estimate_gamma): 
-                    self.particles[i][1] = self.particles[i][1] * np.exp(self.hyperparameters[2] * np.random.normal(0,1)); 
+                    particle[1] = particle[1] * np.exp(self.hyperparameters[2] * np.random.normal(0,1)); 
 
 
     #internal helper function to compute weights based on observations
@@ -149,10 +147,8 @@ class ParticleFilter:
         temp_weights = np.ones(len(self.particles)); 
           
         temp_weights = self.weights *  poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected);
-            #temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1], 0.01* self.particles[j][1]))
 
-            #temp_weights[j] = self.weights[j] * (((self.dailyInfected[j])**(np.round(self.observation_data[t+1]))/gamma(np.round(self.observation_data[t+1]))) * np.exp(-self.dailyInfected[j])); 
-        for j in range(len(self.particles)):  
+        for j,_ in enumerate(self.particles):  
             if(temp_weights[j] == 0):
                 temp_weights[j] = 10**-300; 
             elif(np.isnan(temp_weights[j])):
@@ -172,9 +168,7 @@ class ParticleFilter:
 
         temp_weights = self.compute_temp_weights(t); 
         indexes = np.arange(len(self.particles));
-        # for i in range(len(self.particles)):
-        #     indexes[i] = i;
-
+        
         new_particle_indexes = np.random.choice(a=indexes, size=len(self.particles), replace=True, p=temp_weights);
 
         for i in range(len(self.particles)):
@@ -188,7 +182,6 @@ class ParticleFilter:
         #sigma1 is the deviation of the state and sigma2 is the deviation of beta
         [sigma1,sigma2] = self.hyperparameters;  
         
-        #for fixed beta use 0.4 and for variable use 0.014 
         C = np.diag([(sigma1)**2/self.population,sigma1**2,sigma1**2,sigma2**2]); 
 
         
@@ -201,7 +194,7 @@ class ParticleFilter:
             temp.append(self.particles[i][1]); 
     
             temp = np.log(temp); 
-            perturbed = np.random.multivariate_normal(mean = temp,cov = C);
+            perturbed = np.random.multivariate_normal(mean = temp,cov = C,check_valid='ignore');
             perturbed = np.exp(perturbed); 
             s = (np.sum(perturbed[0:3]));
             perturbed[0:3]= (perturbed[0:3] / s) * self.population; 
@@ -213,9 +206,7 @@ class ParticleFilter:
 
     def norm_likelihood(self,temp_weights_old,t)->None:
         temp_weights = np.zeros(len(self.particles)); 
-        #for j in range(len(self.particles)): 
         temp_weights = poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected);
-            #temp_weights[j] = poisson.pmf(np.round(self.observation_data[t+1], 0.01* self.particles[j][1]))
 
         temp_weights /= np.sum(temp_weights);
     

@@ -12,7 +12,7 @@ def plot(out:Output,graph:np.int_):
 
             colors = cm.plasma(np.linspace(0,1,12)); 
 
-            #plt.plot(t,out.observations,color = "black",zorder=12); 
+            plt.plot(t,out.observations[:out.time],color = "black",zorder=12); 
 
             for i in range(11):
                  plt.fill_between(t, out.qtls[:,i], out.qtls[:,22-i], facecolor = colors[11-i], zorder = i);
