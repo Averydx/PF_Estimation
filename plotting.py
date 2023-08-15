@@ -28,6 +28,8 @@ def plot(out:Output,graph:np.int_):
             plt.figure(figsize=(10,10))
             plt.plot(t,out.average_infected); 
         
+            plt.plot(t,out.observations[:out.time],color = "black",zorder=12); 
+
             plt.title("Average Daily Infections"); 
             plt.xlabel("time(days)"); 
             plt.ylabel("Number of Infections"); 

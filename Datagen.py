@@ -13,8 +13,9 @@ class DataGenerator:
     noise: bool
     params: dict
     hospitalization: bool
+    variance: float
 
-    def __init__(self,params_dict,_initial_state,time_series,data_name,noise=False,hospitalization=False):
+    def __init__(self,params_dict,_initial_state,time_series,data_name,noise=False,hospitalization=False,variance = 0.999):
 
         self.state = []; 
         self.results = []; 
@@ -29,6 +30,7 @@ class DataGenerator:
         self.data_name = data_name; 
         self.noise = noise; 
         self.hospitalization = hospitalization; 
+        self.variance = variance; 
     
         
 
@@ -176,7 +178,6 @@ class DataGenerator:
 
     def plot_beta(self): 
         plt.plot(self.beta); 
-        print(self.beta); 
         plt.xlabel("Time(days)"); 
         plt.ylabel("Value of Beta");
         plt.show(); 

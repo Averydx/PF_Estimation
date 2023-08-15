@@ -3,6 +3,7 @@ from Filtering import ParticleFilter;
 import time; 
 from Datagen import DataGenerator; 
 import numpy as np
+from utility import multivariate_normal
 
 
 ##Run cProfile and snakeviz to extract call stack runtime
@@ -22,16 +23,17 @@ def main():
 
     params = {"beta":beta,"gamma":0.04,"eta":0.1,"hosp":5.3,"L":4.0,"D":90.0}
     
-    initial_state = np.array([100000 ,1000,0])
+    initial_state = np.array([100000 ,1000,0,0])
     time_series = 500; 
-    dg = DataGenerator(params,initial_state,time_series,data_name="beta_test",noise=True,hospitalization=False); 
+    dg = DataGenerator(params,initial_state,time_series,data_name="beta_test",noise=True,hospitalization=True); 
 
     dg.generate_data(); 
     dg.plot_daily_infected(); 
     dg.plot_beta(); 
     dg.plot_states(); 
 
-#     #HOSPITALIZATION RATE FOR FLU IS 0.01
+
+    HOSPITALIZATION RATE FOR FLU IS 0.01
 
     pf = ParticleFilter(beta_prior=[0.,1.],
                                   population=101000,
@@ -45,6 +47,8 @@ def main():
 
     time_series = 499; 
     out = pf.estimate_params(time_series);
+       
+
     end = time.time();
 
     print("The time of execution of the program is :",

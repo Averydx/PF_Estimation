@@ -4,6 +4,7 @@ import NumericalPropagator;
 from scipy.stats import poisson;
 from scipy.stats import nbinom;
 from numpy.typing import NDArray
+from utility import multivariate_normal
 
 class Output:
     average_betas: NDArray[np.float_]
@@ -21,11 +22,11 @@ class Output:
 
      #average beta helper function
     def average_beta(self,particles,t)->None: 
-        mean = 0;
-        for i in range(len(particles)):
-            mean += particles[i][1]; 
-        mean /= len(particles);
-        self.average_betas[t] = mean;
+        mean = 0
+        for _,particle in enumerate(particles): 
+            mean += particle[3]
+        mean /= len(particles)
+        self.average_betas[t] = mean
 
     #average betaSI\N helper function
     def average_dI(self,dailyInfected:NDArray[np.float_],t)->None: 
@@ -58,7 +59,7 @@ class ParticleFilter:
 
         #hyperparameters are sigma1,sigma2 and alpha
 
-        self.particles = []; 
+        self.particles = np.empty((num_particles,4)); 
         self.static_parameters = list;
 
 
@@ -76,10 +77,9 @@ class ParticleFilter:
         self.weights /= num_particles;  
         
 
-        for _ in range(num_particles): 
+        for i,_ in enumerate(self.particles): 
 
             initial_infected = np.random.uniform(0,self.population * init_seed_percent); 
-
             initial_state = [self.population - initial_infected,initial_infected,0]; 
 
             if(estimate_gamma):
@@ -89,13 +89,12 @@ class ParticleFilter:
                 #0.02 is rate at which people return to S
                 initial_static_parameters = static_parameters; 
 
-            beta = (
+            beta = [
                 np.random.uniform(low=beta_prior[0],
-                                  high=beta_prior[1])); 
+                                  high=beta_prior[1])]; 
             
 
-            particle = [initial_state,beta]; 
-            self.particles.append(particle); 
+            self.particles[i] = np.concatenate((initial_state,beta)); 
 
         #Obseravtion data initalization
         self.observation_data = pd.read_csv(filePath); 
@@ -130,10 +129,10 @@ class ParticleFilter:
     def propagate(self)->None: 
         for i,particle in enumerate(self.particles): 
                  
-                self.Propagator.params = [particle[1],self.static_parameters[0],self.static_parameters[1]];
-                self.Propagator.state = particle[0]; 
+                self.Propagator.params = [particle[3],self.static_parameters[0],self.static_parameters[1]];
+                self.Propagator.state = particle[:3]; 
                 state,dailyInf = self.Propagator.propagate_euler(); 
-                particle[0]= np.array(state); 
+                self.particles[i][:3]= np.array(state); 
                 self.dailyInfected[i] = dailyInf; 
 
 
@@ -147,6 +146,7 @@ class ParticleFilter:
         temp_weights = np.ones(len(self.particles)); 
           
         temp_weights = self.weights *  poisson.pmf(np.round(self.observation_data[t+1]),self.dailyInfected);
+        #temp_weights = self.weights * nbinom.pmf(k=np.round(self.observation_data[t+1]),n=self.dailyInfected,p=0.5,loc=self.dailyInfected); 
 
         for j,_ in enumerate(self.particles):  
             if(temp_weights[j] == 0):
@@ -171,7 +171,7 @@ class ParticleFilter:
         
         new_particle_indexes = np.random.choice(a=indexes, size=len(self.particles), replace=True, p=temp_weights);
 
-        for i in range(len(self.particles)):
+        for i,_ in enumerate(self.particles):
             self.particles[i] = self.particles[int(new_particle_indexes[i])];
 
         return temp_weights;  
@@ -183,22 +183,17 @@ class ParticleFilter:
         [sigma1,sigma2] = self.hyperparameters;  
         
         C = np.diag([(sigma1)**2/self.population,sigma1**2,sigma1**2,sigma2**2]); 
-
+        A = np.linalg.cholesky(C)
         
-        
-        for i in range(len(self.particles)):
-            temp = []; 
-            for  j in range(len(self.particles[i][0])):
-                temp.append(self.particles[i][0][j]); 
+        for i,particle in enumerate(self.particles): 
     
-            temp.append(self.particles[i][1]); 
-    
-            temp = np.log(temp); 
-            perturbed = np.random.multivariate_normal(mean = temp,cov = C,check_valid='ignore');
+            temp = np.log(particle); 
+            #perturbed = np.random.multivariate_normal(mean = temp,cov = C,check_valid='ignore');
+            perturbed = multivariate_normal(temp,A)
             perturbed = np.exp(perturbed); 
-            s = (np.sum(perturbed[0:3]));
-            perturbed[0:3]= (perturbed[0:3] / s) * self.population; 
-            self.particles[i] = [perturbed[0:3],perturbed[3]];
+
+            perturbed[0:3]= (perturbed[0:3] / np.sum(perturbed[0:3])) * self.population; 
+            self.particles[i] = perturbed;
             
     #computes the normalized likelihood
 
