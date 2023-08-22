@@ -14,9 +14,11 @@ class DataGenerator:
     noise: bool
     params: dict
     hospitalization: bool
-    variance: float
+    aggregate: int
+    aggregatedInfected: list
 
-    def __init__(self,params_dict,_initial_state,time_series,data_name,noise=False,hospitalization=False,variance = 0.999):
+
+    def __init__(self,params_dict,_initial_state,time_series,data_name,noise=False,hospitalization=False,aggregate = 1):
 
         self.state = [] 
         self.results = [] 
@@ -31,7 +33,8 @@ class DataGenerator:
         self.data_name = data_name 
         self.noise = noise 
         self.hospitalization = hospitalization 
-        self.variance = variance 
+        self.aggregate = aggregate
+        self.aggregatedInfected = []
     
         
 
@@ -115,9 +118,16 @@ class DataGenerator:
 
 
 
+    def aggregate_infected(self): 
+        block = self.aggregate
+        for i in range(int(len(self.dailyInfected)/block)): 
+            self.aggregatedInfected.append(np.sum(self.dailyInfected[i*block:i*block+block]))
+
+
 
 
     def generate_data(self): 
+
 
         betas = []
         self.dailyInfected = []
@@ -126,7 +136,7 @@ class DataGenerator:
         self.results.append(self.state[-1]) 
 
         for t in range(self.time):
-            if(not self.hospitalization):
+            if not self.hospitalization:
                 temp,dI = (self.propagate_euler(self.results[-1],self.params,t))
             
             else: 
@@ -138,12 +148,12 @@ class DataGenerator:
                 self.dailyInfected.append(np.random.poisson(dI)) 
             else:
                 self.dailyInfected.append(dI)
-
             
             self.results.append(temp) 
 
 
-        df = pd.DataFrame(self.dailyInfected) 
+        self.aggregate_infected()
+        df = pd.DataFrame(self.aggregatedInfected) 
         df2 = pd.DataFrame(self.results) 
         df3 = pd.DataFrame(self.beta)
 
@@ -162,18 +172,18 @@ class DataGenerator:
 
     def plot_daily_infected(self): 
         if(not self.hospitalization): 
-            plt.plot(self.dailyInfected) 
-            plt.title("Number of New Daily Infections over Time") 
+            plt.plot(self.aggregatedInfected) 
+            plt.title(f"Number of New Infections{self.aggregate} Day Infections over Time") 
 
-            plt.xlabel("Time(days)") 
+            plt.xlabel("Time") 
             plt.ylabel("Number of Infections") 
             plt.show()
 
         else: 
-            plt.plot(self.dailyInfected) 
-            plt.title("Number of New Daily Hospitalizations over Time") 
+            plt.plot(self.aggregatedInfected) 
+            plt.title(f"Number of New Hospitalizations{self.aggregate}Day  over Time") 
 
-            plt.xlabel("Time(days)") 
+            plt.xlabel("Time") 
             plt.ylabel("Number of Hospitalizations") 
             plt.show()
 

@@ -22,12 +22,9 @@ def beta(t):
 
 def main():
     
-    params = {"beta":beta,"gamma":0.5,"eta":0.1,"hosp":20,"L":90.0,"D":10.0}
+    params = {"beta":beta,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0}
     
-    initial_state = np.array([100000 ,1000,0,0])
-    time_series = 500 
-
-
+    initial_state = np.array([100000 ,1000,0,0]) 
 
     start = time.time() 
 
@@ -64,19 +61,47 @@ def main():
                                   estimate_gamma=False) 
         
 
-    out = pf.estimate_params(args.iterations-1)
-
-    
+    #out = pf.estimate_params(args.iterations-1)
 
 
-    end = time.time()
+    mean = []
+    betas = []
+    for t in range(len(pf.observation_data)): 
+        obvs = 0
+        for i in range(7):
+            pf.propagate()
+            obvs += pf.sim_obvs
+
+        print(f"Mean of particle observations:{np.mean(obvs)}")
+        mean.append(np.mean(obvs))
+        avg = 0
+        for i,particle in enumerate(pf.particles): 
+            avg += particle[4]
+
+        avg = avg / len(pf.particles)
+        betas.append(avg)
+        print(f"Real data: {pf.observation_data[t]}")
+        print("\n")
+
+        pf.resample_with_temp_weights(t,obvs)
+        pf.random_perturbations()
+        end = time.time()
+
+    plt.plot(mean)
+    plt.plot(pf.observation_data)
+    plt.show()
+
+    df = pd.read_csv('/Users/averydrennan/PF_ConfidenceIntervals/PF_Estimation/data_sets/beta_test_beta.csv')
+
+    plt.plot(betas)
+    plt.show()
 
     print("The time of execution of the program is :",
-      (end-start), "s") 
+    (end-start), "s") 
 
-    plot(out,0)  
-    plot(out,1)   
-    plot(out,2) 
+    # plot(out,0)  
+    # plot(out,1)   
+    # plot(out,2) 
 
 
 

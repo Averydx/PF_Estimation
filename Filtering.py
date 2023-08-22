@@ -51,9 +51,10 @@ class ParticleFilter:
     filePath: str
     estimate_gamma: bool
     attribs : dict
+    aggregatedSimObvs: NDArray[np.float_]
 
 
-    def __init__(self,population,beta_prior,num_particles,hyperparamters,static_parameters,init_seed_percent,filePath,ipm = IPM.SIR,estimate_gamma = False):
+    def __init__(self,population,beta_prior,num_particles,hyperparamters,static_parameters,init_seed_percent,filePath,ipm = IPM.SIR,estimate_gamma = False,aggregate = 1):
 
         #Particle and weight initialization
 
@@ -76,6 +77,7 @@ class ParticleFilter:
         self.population = population 
         self.hyperparameters = hyperparamters 
         self.static_parameters = static_parameters 
+        self.aggregate = aggregate
 
 
         #normalize weights
@@ -88,6 +90,7 @@ class ParticleFilter:
                 case "SIR": 
                     initial_infected = np.random.uniform(0,self.population * init_seed_percent) 
                     initial_state = [self.population - initial_infected,initial_infected,0] 
+                    
             
                 case "SIRH": 
                     initial_infected = np.random.uniform(0,self.population * init_seed_percent)
@@ -102,6 +105,9 @@ class ParticleFilter:
                 np.random.uniform(low=beta_prior[0],
                                   high=beta_prior[1])] 
             
+            #beta = [0.4]
+
+
             if(not self.estimate_gamma): 
                 self.particles[i] = np.concatenate((initial_state,beta)) 
             else:
@@ -170,10 +176,10 @@ class ParticleFilter:
 
 
     #internal helper function to compute weights based on observations
-    def compute_temp_weights(self,t)->NDArray[np.float_]:
+    def compute_temp_weights(self,t,obvs)->NDArray[np.float_]:
         temp_weights = np.ones(len(self.particles)) 
           
-        temp_weights = self.weights *  poisson.pmf(np.round(self.observation_data[t+1]),self.sim_obvs)
+        temp_weights = poisson.pmf(np.round(self.observation_data[t]),obvs)
         #temp_weights = self.weights * nbinom.pmf(k=np.round(self.observation_data[t+1]),n=self.sim_obvs,p=0.5,loc=self.sim_obvs) 
 
         for j,_ in enumerate(self.particles):  
@@ -192,9 +198,9 @@ class ParticleFilter:
         return temp_weights 
 
     #resample based on the temp weights that were computed
-    def resample_with_temp_weights(self,t)->NDArray[np.float_]: 
+    def resample_with_temp_weights(self,t,obvs)->NDArray[np.float_]: 
 
-        temp_weights = self.compute_temp_weights(t) 
+        temp_weights = self.compute_temp_weights(t,obvs) 
         indexes = np.arange(len(self.particles))
         
         new_particle_indexes = np.random.choice(a=indexes, size=len(self.particles), replace=True, p=temp_weights)

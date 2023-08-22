@@ -1,8 +1,8 @@
 from Datagen import *
 
 
-def GenerateSimData(params,initial_state,time_series,data_name="beta_test",noise=True,hospitalization=False):
-    dg = DataGenerator(params,initial_state,time_series,data_name,noise,hospitalization) 
+def GenerateSimData(params,initial_state,time_series,data_name="beta_test",noise=True,hospitalization=True):
+    dg = DataGenerator(params,initial_state,time_series,data_name,noise,hospitalization,aggregate=7) 
 
     dg.generate_data() 
     dg.plot_daily_infected() 
