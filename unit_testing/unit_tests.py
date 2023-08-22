@@ -17,6 +17,19 @@ def resample_test():
         print(f"Resampling...Succeeded")
     else : 
         print("Resampling...Failed")
+
+def expectation_test(): 
+    weights = np.ones(10)/10
+    gammas = [0.1,0.2,0.5,0.7,0.12,0.11,0.13,0.22,0.37,0.44]
+    
+    E = 0
+    for i,gamma in enumerate(gammas): 
+        E += weights[i] * np.log(gamma)
+    
+    print("Expectation...Succeeded")
+
+resample_test()
+expectation_test()
        
 
 

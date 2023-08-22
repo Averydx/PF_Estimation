@@ -1,7 +1,9 @@
 from utilities.plotting import plot 
+import pandas as pd
 from Filtering import ParticleFilter 
 import time 
 import numpy as np
+import matplotlib.pyplot as plt
 from utilities.utility import IPM
 from utilities.CLI_parsing import parse
 from utilities.user_data_gen import GenerateSimData
@@ -13,14 +15,14 @@ def beta(t):
       betaMax1=0.1
       theta=0
 
-      #return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
-      return 0.4 
+      return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
+      #return 0.4 
 
 
 
 def main():
     
-    params = {"beta":beta,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0}
+    params = {"beta":beta,"gamma":0.5,"eta":0.1,"hosp":20,"L":90.0,"D":10.0}
     
     initial_state = np.array([100000 ,1000,0,0])
     time_series = 500 
@@ -54,7 +56,7 @@ def main():
     pf = ParticleFilter(beta_prior=[0.,1.],
                                   population=args.population,
                                   num_particles=num_particles, 
-                                  hyperparamters={"sigma1":0.01,"sigma2":0.1,"alpha":0.1},
+                                  hyperparamters={"sigma1":0.1,"sigma2":0.1,"alpha":0.1},
                                   static_parameters={"gamma":0.1,"eta":0.1,"L":90.0,"D":10.0,"hosp":5.3}, 
                                   init_seed_percent=initial_seed,
                                   filePath=file,
@@ -64,7 +66,8 @@ def main():
 
     out = pf.estimate_params(args.iterations-1)
 
-    #pf.propagate()
+    
+
 
     end = time.time()
 

@@ -145,10 +145,11 @@ class DataGenerator:
 
         df = pd.DataFrame(self.dailyInfected) 
         df2 = pd.DataFrame(self.results) 
+        df3 = pd.DataFrame(self.beta)
 
         df.to_csv("./data_sets/" + self.data_name + ".csv") 
-
         df2.to_csv("./data_sets/" + self.data_name + "_states.csv") 
+        df3.to_csv("./data_sets/" + self.data_name + "_beta.csv")
 
     def plot_states(self): 
         plt.yscale('log')

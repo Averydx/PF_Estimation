@@ -212,17 +212,25 @@ class ParticleFilter:
         
         match self.attribs['compartments']: 
             case 3: 
-                C = np.diag([(self.hyperparameters['sigma1'])**2/self.population,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma2']**2]) 
+                C = [(self.hyperparameters['sigma1'])**2/self.population,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma2']**2]
             case 4: 
-                C = np.diag([(self.hyperparameters['sigma1'])**2/self.population,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma1'] **2, self.hyperparameters['sigma2']**2]) 
+                C = [(self.hyperparameters['sigma1'])**2/self.population,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma1']**2,self.hyperparameters['sigma1'] **2, self.hyperparameters['sigma2']**2]
             case _: 
                 print("Compartment number not matched by preloaded covarinace matrices")
                 exit(0)
        
+        C = np.diag(C)
         A = np.linalg.cholesky(C)
+
         
         for i,particle in enumerate(self.particles): 
-    
+
+            if self.estimate_gamma is True: 
+                E = self.expectation_loggamma()
+                
+
+            
+
             temp = np.log(particle) 
             #perturbed = np.random.multivariate_normal(mean = temp,cov = C,check_valid='ignore')
             perturbed = multivariate_normal(temp,A)
@@ -243,6 +251,22 @@ class ParticleFilter:
     
         self.weights = temp_weights/temp_weights_old 
 
+    def expectation_loggamma(self):
+        #Assumes particles include gamma at particles[0:self.attribs['compartments] + 1]
+        E = 0
+        for i,particle in enumerate(self.particles): 
+            E += self.weights[i] * np.log(particle[self.attribs['compartments']  +1])
+
+        return E
+    
+    def loggamma_variance(self,E): 
+        sigma = np.zeros(len(self.particles))
+        for i,particle in enumerate(self.particles): 
+            sigma[i] = self.weights[i] * (np.log(particle[self.attribs['compartments']  +1]) - E)**2
+        return sigma
+            
+        
+            
     
     #function to print the particles in a human readable format
     def print_particles(self):
