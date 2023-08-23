@@ -4,6 +4,8 @@ import NumericalPropagator
 from scipy.stats import poisson
 from scipy.stats import nbinom
 from numpy.typing import NDArray
+import warnings
+warnings.filterwarnings("ignore", category=RuntimeWarning) 
 from utilities.utility import *
 
 class Output:
@@ -51,6 +53,7 @@ class ParticleFilter:
     filePath: str
     estimate_gamma: bool
     attribs : dict
+    aggregate: int
     aggregatedSimObvs: NDArray[np.float_]
 
 
@@ -78,6 +81,7 @@ class ParticleFilter:
         self.hyperparameters = hyperparamters 
         self.static_parameters = static_parameters 
         self.aggregate = aggregate
+        self.aggregatedSimObvs = np.zeros(shape = num_particles)
 
 
         #normalize weights
@@ -128,15 +132,24 @@ class ParticleFilter:
         self.out.average_dI(self.sim_obvs,0)  
 
         for t in range(time): 
-            self.propagate() 
+
+
+            for _ in range(self.aggregate): 
+                self.propagate()
+                self.aggregatedSimObvs += self.sim_obvs 
+
             temp_weights =  self.resample_with_temp_weights(t) 
+            
 
             self.random_perturbations() 
             self.norm_likelihood(temp_weights_old=temp_weights,t=t)
+            
 
             self.out.average_beta(self.particles,self.attribs,t) 
-            self.out.average_dI(self.sim_obvs,t) 
-            self.out.quantiles(self.sim_obvs,t) 
+            self.out.average_dI(self.aggregatedSimObvs,t) 
+            self.out.quantiles(self.aggregatedSimObvs,t) 
+
+            self.aggregatedSimObvs = np.zeros(shape = len(self.particles))
 
             print(f"Iteration:{t} of {time}") 
 
@@ -176,10 +189,10 @@ class ParticleFilter:
 
 
     #internal helper function to compute weights based on observations
-    def compute_temp_weights(self,t,obvs)->NDArray[np.float_]:
+    def compute_temp_weights(self,t)->NDArray[np.float_]:
         temp_weights = np.ones(len(self.particles)) 
           
-        temp_weights = poisson.pmf(np.round(self.observation_data[t]),obvs)
+        temp_weights = poisson.pmf(np.round(self.observation_data[t]),self.aggregatedSimObvs)
         #temp_weights = self.weights * nbinom.pmf(k=np.round(self.observation_data[t+1]),n=self.sim_obvs,p=0.5,loc=self.sim_obvs) 
 
         for j,_ in enumerate(self.particles):  
@@ -198,9 +211,9 @@ class ParticleFilter:
         return temp_weights 
 
     #resample based on the temp weights that were computed
-    def resample_with_temp_weights(self,t,obvs)->NDArray[np.float_]: 
+    def resample_with_temp_weights(self,t)->NDArray[np.float_]: 
 
-        temp_weights = self.compute_temp_weights(t,obvs) 
+        temp_weights = self.compute_temp_weights(t) 
         indexes = np.arange(len(self.particles))
         
         new_particle_indexes = np.random.choice(a=indexes, size=len(self.particles), replace=True, p=temp_weights)
@@ -251,7 +264,7 @@ class ParticleFilter:
 
     def norm_likelihood(self,temp_weights_old,t)->None:
         temp_weights = np.zeros(len(self.particles)) 
-        temp_weights = poisson.pmf(np.round(self.observation_data[t+1]),self.sim_obvs)
+        temp_weights = poisson.pmf(np.round(self.observation_data[t]),self.aggregatedSimObvs)
 
         temp_weights /= np.sum(temp_weights)
     

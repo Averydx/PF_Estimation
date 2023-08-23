@@ -8,9 +8,6 @@ Enter python virtual environment and install requirements.txt (using vscode or s
 
 Required Arguments: 
 
---iterations 
-The number of iterations for which to run the algorithm, generally this would be the length of your data set 
-
 --population 
 The population of the data set you are estimating over i.e the population of Arizona 
 
@@ -40,8 +37,9 @@ uniform[0,population * initial_seed]
 --particles 
 Specifies the number of particles with which to run the simulation, defaults to 10000 but any integer number is valid, performance may vary 
 
-
-
+--iterations 
+Specify if you want to run the algorithm for less than the length of your data set
+i.e. in a forecasting application
 
 
 Example of execution after entering venv with simulated data:

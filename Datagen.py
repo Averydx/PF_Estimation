@@ -18,7 +18,7 @@ class DataGenerator:
     aggregatedInfected: list
 
 
-    def __init__(self,params_dict,_initial_state,time_series,data_name,noise=False,hospitalization=False,aggregate = 1):
+    def __init__(self,params_dict,_initial_state,time_series,data_name,noise=True,hospitalization=True,aggregate = 1):
 
         self.state = [] 
         self.results = [] 

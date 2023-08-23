@@ -26,13 +26,15 @@ def main():
     
     initial_state = np.array([100000 ,1000,0,0]) 
 
+    time_series = 343
+
     start = time.time() 
 
     #Handles all argument parsing --DONT DELETE--
     args = parse()
 
     if args.simulate_data is not None: 
-       GenerateSimData(params,initial_state,args.iterations,hospitalization=True)
+       GenerateSimData(params,initial_state,time_series,hospitalization=True)
        file = "./data_sets/beta_test.csv"
     else: 
         file = args.file
@@ -53,55 +55,26 @@ def main():
     pf = ParticleFilter(beta_prior=[0.,1.],
                                   population=args.population,
                                   num_particles=num_particles, 
-                                  hyperparamters={"sigma1":0.2,"sigma2":0.1,"alpha":0.1},
+                                  hyperparamters={"sigma1":0.01,"sigma2":0.1,"alpha":0.1},
                                   static_parameters={"gamma":0.1,"eta":0.1,"L":90.0,"D":10.0,"hosp":5.3}, 
                                   init_seed_percent=initial_seed,
                                   filePath=file,
                                   ipm=IPM.SIRH,
-                                  estimate_gamma=False) 
+                                  estimate_gamma=False,
+                                  aggregate=1) 
         
 
-    #out = pf.estimate_params(args.iterations-1)
+    out = pf.estimate_params(args.iterations if args.iterations is not None and args.iterations < len(pf.observation_data) else len(pf.observation_data))
 
 
-    mean = []
-    betas = []
-    for t in range(len(pf.observation_data)): 
-        obvs = 0
-        for i in range(7):
-            pf.propagate()
-            obvs += pf.sim_obvs
-
-        print(f"Mean of particle observations:{np.mean(obvs)}")
-        mean.append(np.mean(obvs))
-        avg = 0
-        for i,particle in enumerate(pf.particles): 
-            avg += particle[4]
-
-        avg = avg / len(pf.particles)
-        betas.append(avg)
-        print(f"Real data: {pf.observation_data[t]}")
-        print("\n")
-
-        pf.resample_with_temp_weights(t,obvs)
-        pf.random_perturbations()
-        end = time.time()
-
-    plt.plot(mean)
-    plt.plot(pf.observation_data)
-    plt.show()
-
-    df = pd.read_csv('/Users/averydrennan/PF_ConfidenceIntervals/PF_Estimation/data_sets/beta_test_beta.csv')
-
-    plt.plot(betas)
-    plt.show()
+    end = time.time()
 
     print("The time of execution of the program is :",
     (end-start), "s") 
 
-    # plot(out,0)  
-    # plot(out,1)   
-    # plot(out,2) 
+    plot(out,0)  
+    #plot(out,1)   
+    plot(out,2) 
 
 
 
