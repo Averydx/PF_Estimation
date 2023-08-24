@@ -6,8 +6,9 @@ def parse():
     parser.add_argument('--population',type=int,required=True)
     parser.add_argument('--file',type=str)
     parser.add_argument('--initial_seed',type=float)
-    parser.add_argument('--simulate_data',type =bool)
+    parser.add_argument('--simulate_data',action='store_true')
     parser.add_argument('--particles',type=int)
+    parser.add_argument('--forecast',action='store_true')
     args = parser.parse_args()
 
 

@@ -1,4 +1,4 @@
-from Filtering import Output 
+from ParticleFilter.Filtering import Output 
 import numpy as np 
 import matplotlib.pyplot as plt 
 from matplotlib import cm 
@@ -8,20 +8,26 @@ def plot(out:Output,graph:int):
         case 0:
             t = np.linspace(0,out.time,num=out.time)
 
+            fig, (ax1, ax2) = plt.subplots(1, 2)
+            fig.suptitle('Horizontally stacked subplots')
+
             plt.figure(figsize=(10, 10))
 
             colors = cm.plasma(np.linspace(0,1,12))  # type: ignore
 
-            plt.plot(t,out.observations[:out.time],color = "black",zorder=12) 
+            ax1.plot(t,out.observations[:out.time],color = "black",zorder=12) 
 
             for i in range(11):
-                 plt.fill_between(t, out.qtls[:,i], out.qtls[:,22-i], facecolor = colors[11-i], zorder = i) # type: ignore
+                 ax1.fill_between(t, out.qtls[:,i], out.qtls[:,22-i], facecolor = colors[11-i], zorder = i) # type: ignore
     
-            plt.xlabel("time(days)") 
-            plt.ylabel("Number of Infections") 
-            plt.title("Confidence Intervals") 
+
+            ax2.plot(t,out.average_betas)
+
 
             plt.show()
+            # plt.xlabel("time(days)") 
+            # plt.ylabel("Number of Infections") 
+            # plt.title("Confidence Intervals") 
         
         case 1: 
             t = np.linspace(0,out.time,num=out.time) 

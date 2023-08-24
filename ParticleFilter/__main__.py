@@ -1,12 +1,10 @@
-from utilities.plotting import plot 
-import pandas as pd
-from Filtering import ParticleFilter 
+from ParticleFilter.utilities.plotting import plot 
+from ParticleFilter.Filtering import ParticleFilter 
 import time 
 import numpy as np
-import matplotlib.pyplot as plt
-from utilities.utility import IPM
-from utilities.CLI_parsing import parse
-from utilities.user_data_gen import GenerateSimData
+from ParticleFilter.utilities.utility import IPM
+from ParticleFilter.utilities.CLI_parsing import parse
+from ParticleFilter.utilities.user_data_gen import GenerateSimData
 
 ##Run cProfile and snakeviz to extract call stack runtime
 
@@ -15,8 +13,8 @@ def beta(t):
       betaMax1=0.1
       theta=0
 
-      #return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
-      return 0.4 
+      return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
+      #return 0.4 
 
 
 
@@ -33,7 +31,7 @@ def main():
     #Handles all argument parsing --DONT DELETE--
     args = parse()
 
-    if args.simulate_data is not None: 
+    if args.simulate_data is True: 
        GenerateSimData(params,initial_state,time_series,hospitalization=True)
        file = "./data_sets/beta_test.csv"
     else: 
@@ -61,7 +59,8 @@ def main():
                                   filePath=file,
                                   ipm=IPM.SIRH,
                                   estimate_gamma=False,
-                                  aggregate=1) 
+                                  aggregate=1,
+                                  forecast = True) 
         
 
     out = pf.estimate_params(args.iterations if args.iterations is not None and args.iterations < len(pf.observation_data) else len(pf.observation_data))
@@ -72,9 +71,11 @@ def main():
     print("The time of execution of the program is :",
     (end-start), "s") 
 
+
+
     plot(out,0)  
-    #plot(out,1)   
-    plot(out,2) 
+    # plot(out,1)   
+    # plot(out,2) 
 
 
 

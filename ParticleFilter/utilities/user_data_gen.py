@@ -1,4 +1,4 @@
-from Datagen import *
+from ParticleFilter.Datagen import *
 
 
 def GenerateSimData(params,initial_state,time_series,data_name="beta_test",noise=True,hospitalization=True):
