@@ -13,6 +13,7 @@ class Output:
     average_infected: NDArray[np.float_]
     qtls: NDArray
     observations:NDArray[np.float_]
+    real_beta: NDArray[np.float_]
     time: int
 
     def __init__(self,time,observations) -> None:
@@ -21,6 +22,7 @@ class Output:
         self.qtls = np.empty(shape=(time,23)) 
         self.time = time 
         self.observations = observations 
+        self.real_beta = []
 
 
      #average beta helper function
@@ -58,7 +60,7 @@ class ParticleFilter:
     forecast:bool
 
 
-    def __init__(self,population,beta_prior,num_particles,hyperparamters,static_parameters,init_seed_percent,filePath,ipm = IPM.SIR,estimate_gamma = False,aggregate = 1,forecast=False):
+    def __init__(self,population,beta_prior,num_particles,hyperparamters,static_parameters,init_seed_percent,filePath,forecast,ipm = IPM.SIR,estimate_gamma = False,aggregate = 1,):
 
         #Particle and weight initialization
 
@@ -139,7 +141,7 @@ class ParticleFilter:
                 self.propagate()
                 self.aggregatedSimObvs += self.sim_obvs 
 
-            if (self.forecast is True) and (t > len(self.observation_data)/3): 
+            if (self.forecast is True) and (t > len(self.observation_data)/2): 
                 pass
                 
                 

@@ -42,6 +42,9 @@ Specify if you want to run the algorithm for less than the length of your data s
 i.e. in a forecasting application
 
 
+--forecast
+If specified the algorithm will stop after len(observation_data)/2 and propagate each particle forward using the last values of beta
+
 Example of execution after entering venv with simulated data:
 
 python main.py --iterations 500 --population 100000 --particles 50000 --simulate_data true --initial_seed 0.1
