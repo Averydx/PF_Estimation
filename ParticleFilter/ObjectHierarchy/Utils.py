@@ -1,15 +1,12 @@
 from dataclasses import dataclass,field
 from numpy.typing import NDArray
-from numpy import int_,float_
-from typing import Optional
+from numpy import random,int_,float_
+from typing import Dict
 
 @dataclass(frozen=True)
 class RunInfo: 
     observation_data: NDArray[int_] #Array of observation data that will be passed to the Algorithm, dimension agnostic 
     forecast_time:int # optional param to indicate the amount of time series to forecast 
-    particle_count:int  #optional number of particles to use in the algorithm, defaults to 1000
-    data_scale:int #optional param to indicate the scale of the data i.e. the number number of days between each data point
-
 
 class Clock: 
     time: int
@@ -19,18 +16,22 @@ class Clock:
     def tick(self):
         self.time +=1
 
-
-
 @dataclass
 class Particle: 
-    param: NDArray[float_]
+    param: Dict
     state: NDArray
-    observation: int
+    observation: NDArray[int_]
 
 @dataclass(frozen=True)
 class Context: 
     particle_count: int
     clock: Clock
+    rng:random.Generator
+    data_scale:int #optional param to indicate the scale of the data i.e. the number number of days between each data point
+    seed_size: float #estimate of initial percentage of infected out of the total population
+    population: int #estimate of the total population 
+    state_size: int #number of state variables in the model 
+
 
 
 

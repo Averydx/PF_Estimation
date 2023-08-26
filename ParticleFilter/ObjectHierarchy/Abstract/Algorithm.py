@@ -1,6 +1,7 @@
 from abc import ABC,abstractmethod,abstractproperty
 from numpy.typing import NDArray
-from typing import List
+from numpy import random,array,concatenate
+from typing import List,Dict
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
@@ -9,22 +10,38 @@ from ObjectHierarchy.Utils import RunInfo,Particle,Context,Clock
 
 class Algorithm(ABC): 
 
-    _integrator: Integrator
-    _perturb: Perturb
-    _resampler: Resampler
-    _particles: List[Particle]
-    _context: Context
+    integrator: Integrator
+    perturb: Perturb
+    resampler: Resampler
+    particles: List[Particle]
+    context: Context
 
     def __init__(self,integrator:Integrator,perturb:Perturb,resampler:Resampler)->None:
-        self._integrator = integrator
-        self._perturb = perturb
-        self._resampler = resampler
-        self._particles = []
-        self._context = Context(particle_count=0,clock=Clock())
+        self.integrator = integrator
+        self.perturb = perturb
+        self.resampler = resampler
+        self.particles = []
+
+
+
+    '''Abstract Methods''' 
+    @abstractmethod
+    def initialize(self,params:Dict)->None: #method to initialize all fields of the 
+        for _ in range(self.context.particle_count): 
+            initial_infected = self.context.rng.uniform(0,self.context.seed_size/self.context.population)
+            state = concatenate((array([self.context.population-initial_infected,initial_infected]),[0 for _ in range(self.context.state_size-2)])) #SIRH model 
+            self.particles.append(Particle(param=params.copy(),state=state,observation=array([0])))
 
     @abstractmethod
     def run(self,info:RunInfo) ->Output:
         pass
+
+    '''Callables'''
+
+    def print_particles(self): 
+        for _,particle in enumerate(self.particles): 
+            print(particle)
+    
 
 
 
