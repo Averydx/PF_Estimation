@@ -15,11 +15,12 @@ def plot(out:Output,graph:int):
             ax1.set_ylim(0, 300)
             ax1.plot(t, out.observations[:out.time], color="blue", zorder=12)
             for i in range(11):
-                ax1.fill_between(t, out.qtls[:, i], out.qtls[:, 22 - i], facecolor=colors[11 - i], zorder=i)
+                ax1.fill_between(t, out.obs_qtls[:, i], out.obs_qtls[:, 22 - i], facecolor=colors[11 - i], zorder=i)
             ax2.set_ylim(0, 1)
-            ax2.plot(t, out.average_betas)
+            for i in range(11):
+                ax2.fill_between(t, out.beta_qtls[:, i], out.beta_qtls[:, 22 - i], facecolor=colors[11 - i], zorder=i)
             if len(out.real_beta) > 0:
-                ax2.plot(t, out.real_beta)
+                ax2.plot(t, out.real_beta,color="blue",zorder=12)
             # To show all the y-ticks
             ax1.yaxis.set_major_locator(ticker.LinearLocator())
             ax2.yaxis.set_major_locator(ticker.LinearLocator())
