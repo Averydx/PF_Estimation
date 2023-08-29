@@ -25,10 +25,10 @@ algo = TimeDependentAlgo(integrator=euler,perturb=perturb,resampler=resample)
 algo.initialize()
 
 
-info = RunInfo(observation_data=real_beta.astype(int),forecast_time=0)
+info = RunInfo(observation_data=np.array([0,0,0]),forecast_time=0)
 
 Output = algo.run(info=info)
-algo.print_particles()
+
 
 
 

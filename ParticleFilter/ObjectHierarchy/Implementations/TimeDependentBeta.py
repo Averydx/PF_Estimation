@@ -16,7 +16,7 @@ class TimeDependentAlgo(Algorithm):
 
     def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler) -> None:
         super().__init__(integrator, perturb, resampler)
-        self.context = Context(particle_count=1000,clock=Clock(),rng=random.default_rng(),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
+        self.context = Context(particle_count=5,clock=Clock(),rng=random.default_rng(),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
 
 
     '''Basic initialization function, these functions will always call back to the parent for the basic setup, just initialize the params as a dictionary'''
@@ -51,7 +51,6 @@ class Euler(Integrator):
 
             particleArray[j].state += dt
             particleArray[j].observation = sim_obv
-
         return particleArray
     
     def RHS_H(self,particle:Particle):

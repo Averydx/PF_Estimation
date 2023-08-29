@@ -46,6 +46,7 @@ class Algorithm(ABC):
                 
                 print(self.context.clock.time)
                 self.particles=self.integrator.propagate(self.particles)
+                self.print_particles()
                     
                 weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
                 self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
