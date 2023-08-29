@@ -1,7 +1,9 @@
 from dataclasses import dataclass,field
 from numpy.typing import NDArray
 from numpy import random,int_,float_
-from typing import Dict
+from typing import Dict,List
+from functools import wraps
+from time import perf_counter
 
 @dataclass(frozen=True)
 class RunInfo: 
@@ -31,6 +33,19 @@ class Context:
     seed_size: float #estimate of initial percentage of infected out of the total population
     population: int #estimate of the total population 
     state_size: int #number of state variables in the model 
+    estimated_params: List[str] #number of estimated parameters in the model 
+
+
+def timing(f):
+    @wraps(f)
+    def wrap(*args, **kw):
+        ts = perf_counter()
+        result = f(*args, **kw)
+        te = perf_counter()
+        print('func:%r args:[%r, %r] took: %2.4f sec' % \
+          (f.__name__, args, kw, te-ts))
+        return result
+    return wrap
 
 
 

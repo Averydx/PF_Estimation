@@ -19,10 +19,10 @@ class Resampler(ABC):
     def compute_weights(self,observation:int,particleArray:List[Particle])->NDArray[float_]: #implementations of compute_weights call the Resamplers _likelihood function in the computation
         pass
 
+    @abstractmethod
     def resample(self,weights:NDArray[float_],ctx:Context,particleArray:List[Particle]) ->List[Particle]: #Resamples based on the weights returned from compute_weights and returns the new indexes
         
         indexes = np.arange(ctx.particle_count)
-
         new_particle_indexes = ctx.rng.choice(a=indexes, size=ctx.particle_count, replace=True, p=weights)
         particle_copy = particleArray.copy()
 
