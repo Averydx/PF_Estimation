@@ -14,8 +14,8 @@ def beta(t):
       betaMax1=0.1
       theta=0
 
-      #return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
-      return 0.4 
+      return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
+      #return 0.4
 
 
 
@@ -59,7 +59,7 @@ def main():
     pf = ParticleFilter(beta_prior=[0.,1.],
                                   population=args.population,
                                   num_particles=num_particles, 
-                                  hyperparamters={"sigma1":0.3,"sigma2":0.1,"alpha":0.1},
+                                  hyperparamters={"sigma1":0.01,"sigma2":0.1,"alpha":0.1},
                                   static_parameters={"gamma":0.1,"eta":0.1,"L":90.0,"D":10.0,"hosp":5.3}, 
                                   init_seed_percent=initial_seed,
                                   filePath=file,
@@ -83,9 +83,9 @@ def main():
 
 
 
-    plot(out,0)  
+    #plot(out,0)  
     # plot(out,1)   
-    # plot(out,2) 
+    plot(out,2) 
 
 
 

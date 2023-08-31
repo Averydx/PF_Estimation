@@ -8,8 +8,8 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 
 def likelihood(observation,particle_observations:NDArray[int_])->NDArray: 
-    #return poisson.pmf(observation,particle_observations)
-    return np.array([1 for _ in range(len(particle_observations))])
+    return poisson.pmf(observation,particle_observations)
+    #return np.array([1 for _ in range(len(particle_observations))])
 
 
 real_beta = pd.read_csv('./data_sets/beta_test.csv')
@@ -18,16 +18,18 @@ real_beta = np.delete(real_beta,0,1)
 
 np.set_printoptions(suppress=True)
 euler = Euler()
-perturb = MultivariatePerturbations(params={"sigma1":0.1,"sigma2":0.1})
+perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.01})
 resample = PoissonResample(likelihood=likelihood)
 
 algo = TimeDependentAlgo(integrator=euler,perturb=perturb,resampler=resample)
 algo.initialize()
 
 
-info = RunInfo(observation_data=np.array([0,0,0]),forecast_time=0)
+info = RunInfo(observation_data=real_beta,forecast_time=0)
 
 Output = algo.run(info=info)
+
+
 
 
 

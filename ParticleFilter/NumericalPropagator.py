@@ -64,7 +64,7 @@ class one_step_propagator:
         sol[:,0] = np.array([self.state[0], self.state[1], self.state[2],self.state[3]])
 
         for i in range(len(tSpanFine)-1):
-
+            
             dt,new_H = self.RHS_H(sol[:,i])
             dailyHospitalized =  new_H/NperDay
             sol[:,i+1] = sol[:,i] + dt/NperDay

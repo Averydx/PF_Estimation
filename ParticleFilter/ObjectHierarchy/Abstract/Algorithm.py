@@ -7,6 +7,9 @@ from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.Output import Output
 from ObjectHierarchy.Utils import RunInfo,Particle,Context,Clock
+import matplotlib.pyplot as plt
+import numpy as np
+from copy import deepcopy
 
 class Algorithm(ABC): 
 
@@ -37,24 +40,35 @@ class Algorithm(ABC):
             state = concatenate((array([self.context.population-initial_infected,initial_infected]),[0 for _ in range(self.context.state_size-2)])) #SIRH model 
             self.particles.append(Particle(param=params.copy(),state=state,observation=array([0])))
 
+        
+
     @abstractmethod
     def run(self,info:RunInfo) ->Output:
-        if info.forecast_time > 0 and (info.observation_data - info.forecast_time) > 5:
-            pass
-        else: 
-            while self.context.clock.time < len(info.observation_data): 
-                
-                print(self.context.clock.time)
-                self.particles=self.integrator.propagate(self.particles)
-                self.print_particles()
-                    
+        series_s1 = []
+        series_s2 = []
+
+        while self.context.clock.time < len(info.observation_data): 
+                self.particles = self.integrator.propagate(self.particles)
+
+                series_s2.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)]))
+                series_s1.append(np.mean([particle.observation for _,particle in enumerate(self.particles)]))
+                print(series_s2[-1])
+
+
                 weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
                 self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
 
-                #self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
+                self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
 
                 self.context.clock.tick()
+                print(self.context.clock.time)
+                print("\n")
 
+        fig,(ax1,ax2) = plt.subplots(1,2)
+        ax1.plot(series_s1)
+        ax2.plot(series_s2,color='red')
+        #plt.yscale('log')
+        plt.show()
         return Output
 
     '''Callables'''

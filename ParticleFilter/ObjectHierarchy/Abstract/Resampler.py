@@ -5,6 +5,7 @@ from numpy import float_,int_
 from types import FunctionType,BuiltinFunctionType
 from typing import List
 from ObjectHierarchy.Utils import Context,Particle
+from copy import deepcopy
 
 class Resampler(ABC): 
 
@@ -24,10 +25,13 @@ class Resampler(ABC):
         
         indexes = np.arange(ctx.particle_count)
         new_particle_indexes = ctx.rng.choice(a=indexes, size=ctx.particle_count, replace=True, p=weights)
-        particle_copy = particleArray.copy()
 
-        for i,_ in enumerate(particleArray):
-            particleArray[i] = particle_copy[int(new_particle_indexes[i])]
+        particleCopy = particleArray.copy()
+        for i in range(len(particleArray)): 
+            particleArray[i] = deepcopy(particleCopy[new_particle_indexes[i]])
+
+
+        
 
         return particleArray
 

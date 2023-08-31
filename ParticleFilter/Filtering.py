@@ -152,7 +152,7 @@ class ParticleFilter:
                 temp_weights =  self.resample_with_temp_weights(t) 
                 
                 self.random_perturbations() 
-                self.norm_likelihood(temp_weights_old=temp_weights,t=t)
+                #self.norm_likelihood(temp_weights_old=temp_weights,t=t)
             
             
 
@@ -205,7 +205,7 @@ class ParticleFilter:
     def compute_temp_weights(self,t)->NDArray[np.float_]:
         temp_weights = np.ones(len(self.particles)) 
           
-        temp_weights = self.weights * poisson.pmf(np.round(self.observation_data[t]),self.aggregatedSimObvs)
+        temp_weights = poisson.pmf(np.round(self.observation_data[t]),self.aggregatedSimObvs)
         #temp_weights = self.weights * nbinom.pmf(k=np.round(self.observation_data[t+1]),n=self.sim_obvs,p=0.5,loc=self.sim_obvs) 
 
         for j,_ in enumerate(self.particles):  
