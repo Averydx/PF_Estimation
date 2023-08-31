@@ -15,9 +15,9 @@ from ObjectHierarchy.Utils import Context
 
 class TimeDependentAlgo(Algorithm): 
 
-    def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler) -> None:
+    def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler,context:Context) -> None:
         super().__init__(integrator, perturb, resampler)
-        self.context = Context(particle_count=10000,clock=Clock(),rng=random.default_rng(1),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
+        self.context = context
 
 
     '''Basic initialization function, these functions will always call back to the parent for the basic setup, just initialize the params as a dictionary'''
@@ -37,8 +37,23 @@ class TimeDependentAlgo(Algorithm):
     @timing
     def run(self,info:RunInfo) ->Output:
 
-    
-        return super().run(info=info)
+        output = Output(beta_qtls=list(),observation_qtls=list())
+        while self.context.clock.time < len(info.observation_data): 
+            self.particles = self.integrator.propagate(self.particles)
+
+            weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
+            self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
+
+            self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
+
+            '''output updates, not part of the main algorithm'''
+            output.beta_qtls.append(quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)]))
+            output.observation_qtls.append(quantiles([particle.observation for _,particle in enumerate(self.particles)]))
+
+            self.context.clock.tick()
+            print(f"iteration: {self.context.clock.time}")
+
+        return output
     
 
 
@@ -58,6 +73,7 @@ class Euler(Integrator):
 
         return particleArray
     
+
     def RHS_H(self,particle:Particle):
     #params has all the parameters – beta, gamma
     #state is a numpy array
@@ -74,8 +90,6 @@ class Euler(Integrator):
 
         return np.array([dS,dI,dR,dH]),new_H
     
-
-
 
 class MultivariatePerturbations(Perturb): 
     def __init__(self,params:Dict) -> None:

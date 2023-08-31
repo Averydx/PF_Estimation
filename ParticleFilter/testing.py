@@ -12,23 +12,25 @@ def likelihood(observation,particle_observations:NDArray[int_])->NDArray:
     #return np.array([1 for _ in range(len(particle_observations))])
 
 
-real_beta = pd.read_csv('./data_sets/FLU_HOSPITALIZATIONS.csv')
+real_beta = pd.read_csv('./data_sets/beta_test.csv')
 real_beta = np.squeeze(real_beta.to_numpy()) 
 real_beta = np.delete(real_beta,0,1)
 
 np.set_printoptions(suppress=True)
 euler = Euler()
-perturb = MultivariatePerturbations(params={"sigma1":0.1,"sigma2":0.1})
+perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.1})
 resample = PoissonResample(likelihood=likelihood)
 
-algo = TimeDependentAlgo(integrator=euler,perturb=perturb,resampler=resample)
+algo = TimeDependentAlgo(integrator=euler,
+                         perturb=perturb,
+                         resampler=resample,
+                         context=Context(particle_count=1000,clock=Clock(),rng=random.default_rng(),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[]))
 algo.initialize()
 
 
 algo.run(RunInfo(np.array(real_beta),0))
 
-#TODO DEBUG 
-#SOLVED GLITCH IN PERTURBATIONS 
+
 
 
 

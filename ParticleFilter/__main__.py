@@ -58,7 +58,7 @@ def main():
     pf = ParticleFilter(beta_prior=[0.,1.],
                                   population=args.population,
                                   num_particles=num_particles, 
-                                  hyperparamters={"sigma1":0.1,"sigma2":0.1,"alpha":0.1},
+                                  hyperparamters={"sigma1":0.01,"sigma2":0.1,"alpha":0.1},
                                   static_parameters={"gamma":0.1,"eta":0.1,"L":90.0,"D":10.0,"hosp":5.3}, 
                                   init_seed_percent=initial_seed,
                                   filePath=file,

@@ -44,38 +44,16 @@ class Algorithm(ABC):
 
     @abstractmethod
     def run(self,info:RunInfo) ->Output:
-        series_s1 = []
-        series_s2 = []
-
-        while self.context.clock.time < len(info.observation_data)-1: 
-                self.particles = self.integrator.propagate(self.particles)
-
-                series_s2.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)]))
-                series_s1.append(np.mean([particle.observation for _,particle in enumerate(self.particles)]))
-
-                print(series_s2[-1])
-
-                weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
-                self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
-
-                self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
-
-                self.context.clock.tick()
-                print(self.context.clock.time)
-                print("\n")
-
-        fig,(ax1,ax2) = plt.subplots(1,2)
-        ax1.plot(series_s1)
-        ax2.plot(series_s2,color='red')
-        #plt.yscale('log')
-        plt.show()
-        return Output
+        pass
+        
 
     '''Callables'''
 
     def print_particles(self): 
         for i,particle in enumerate(self.particles): 
             print(f"{i}: {particle}")
+
+
     
 
 
