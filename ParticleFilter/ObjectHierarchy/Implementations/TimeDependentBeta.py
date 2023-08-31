@@ -7,6 +7,7 @@ from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.Output import Output
 from ObjectHierarchy.Utils import *
+from utilities.utility import multivariate_normal
 from typing import Tuple,List,Dict
 import numpy as np
 
@@ -16,7 +17,7 @@ class TimeDependentAlgo(Algorithm):
 
     def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler) -> None:
         super().__init__(integrator, perturb, resampler)
-        self.context = Context(particle_count=10000,clock=Clock(),rng=random.default_rng(),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
+        self.context = Context(particle_count=1000,clock=Clock(),rng=random.default_rng(1),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
 
 
     '''Basic initialization function, these functions will always call back to the parent for the basic setup, just initialize the params as a dictionary'''
@@ -29,8 +30,7 @@ class TimeDependentAlgo(Algorithm):
         for i in range(self.context.particle_count): 
             '''initialize all other estimated parameters here'''
 
-            beta = self.context.rng.uniform(0,1)
-
+            beta = self.context.rng.uniform(0.,1.)
             self.particles[i].param['beta'] = beta
 
         
@@ -82,14 +82,21 @@ class MultivariatePerturbations(Perturb):
         super().__init__(params)
 
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
-        C = np.diag([self.hyperparameters['sigma1']/ctx.population,self.hyperparameters['sigma1'],self.hyperparameters['sigma1'],self.hyperparameters['sigma1'],self.hyperparameters['sigma2']]).astype(float)
+        C = np.diag([(self.hyperparameters['sigma1']/ctx.population) ** 2,
+                     self.hyperparameters['sigma1'] ** 2,
+                     self.hyperparameters['sigma1'] ** 2,
+                     self.hyperparameters['sigma1'] **2,
+                     self.hyperparameters['sigma2'] ** 2]).astype(float)
+        
+        
+        A = np.linalg.cholesky(C)
         for i,_ in enumerate(particleArray): 
 
             #variation of the state and parameters
 
             perturbed = np.log(np.concatenate((particleArray[i].state,[particleArray[i].param['beta']])))
 
-            perturbed = np.exp(ctx.rng.multivariate_normal(perturbed,C))
+            perturbed = np.exp(multivariate_normal(perturbed,A))
             perturbed[0:ctx.state_size] /= np.sum(perturbed[0:ctx.state_size])
             perturbed[0:ctx.state_size] *= ctx.population
 
@@ -111,7 +118,8 @@ class PoissonResample(Resampler):
 #TODO Debug invalid weights in divide 
     def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[float_]:
 
-        weights = np.array(self.likelihood(observation,[particle.observation for particle in particleArray]))
+        weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray]))
+
 
         for j in range(len(particleArray)):  
             if(weights[j] == 0):
@@ -123,6 +131,7 @@ class PoissonResample(Resampler):
 
 
         weights = weights/np.sum(weights)
+
         
         return np.squeeze(weights)
     

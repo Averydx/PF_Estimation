@@ -38,7 +38,7 @@ class Algorithm(ABC):
         for _ in range(self.context.particle_count): 
             initial_infected = self.context.rng.uniform(0,self.context.seed_size*self.context.population)
             state = concatenate((array([self.context.population-initial_infected,initial_infected]),[0 for _ in range(self.context.state_size-2)])) #SIRH model 
-            self.particles.append(Particle(param=params.copy(),state=state,observation=array([0])))
+            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=array([0])))
 
         
 
@@ -47,13 +47,13 @@ class Algorithm(ABC):
         series_s1 = []
         series_s2 = []
 
-        while self.context.clock.time < len(info.observation_data): 
+        while self.context.clock.time < len(info.observation_data)-1: 
                 self.particles = self.integrator.propagate(self.particles)
 
                 series_s2.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)]))
                 series_s1.append(np.mean([particle.observation for _,particle in enumerate(self.particles)]))
-                print(series_s2[-1])
 
+                print(series_s2[-1])
 
                 weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
                 self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
@@ -74,8 +74,8 @@ class Algorithm(ABC):
     '''Callables'''
 
     def print_particles(self): 
-        for _,particle in enumerate(self.particles): 
-            print(particle)
+        for i,particle in enumerate(self.particles): 
+            print(f"{i}: {particle}")
     
 
 

@@ -18,17 +18,17 @@ real_beta = np.delete(real_beta,0,1)
 
 np.set_printoptions(suppress=True)
 euler = Euler()
-perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.01})
+perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.1})
 resample = PoissonResample(likelihood=likelihood)
 
 algo = TimeDependentAlgo(integrator=euler,perturb=perturb,resampler=resample)
 algo.initialize()
 
 
-info = RunInfo(observation_data=real_beta,forecast_time=0)
+algo.run(RunInfo(np.array(real_beta),0))
 
-Output = algo.run(info=info)
-
+#TODO DEBUG 
+#SOLVED GLITCH IN PERTURBATIONS 
 
 
 
