@@ -17,7 +17,7 @@ class TimeDependentAlgo(Algorithm):
 
     def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler) -> None:
         super().__init__(integrator, perturb, resampler)
-        self.context = Context(particle_count=1000,clock=Clock(),rng=random.default_rng(1),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
+        self.context = Context(particle_count=10000,clock=Clock(),rng=random.default_rng(1),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[])
 
 
     '''Basic initialization function, these functions will always call back to the parent for the basic setup, just initialize the params as a dictionary'''
