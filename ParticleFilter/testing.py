@@ -30,7 +30,7 @@ algo.initialize()
 
 
 out = algo.run(RunInfo(np.array(real_beta),0))
-#plot(out,0)
+plot(out,0)
 
 
 
