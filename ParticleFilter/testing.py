@@ -1,5 +1,6 @@
 from ObjectHierarchy.Implementations.TimeDependentBeta import *
 from ObjectHierarchy.Output import Output
+from ObjectHierarchy.plotting import plot
 from ObjectHierarchy.Utils import RunInfo
 from scipy.stats import poisson
 from numpy.typing import NDArray
@@ -24,11 +25,13 @@ resample = PoissonResample(likelihood=likelihood)
 algo = TimeDependentAlgo(integrator=euler,
                          perturb=perturb,
                          resampler=resample,
-                         context=Context(particle_count=1000,clock=Clock(),rng=random.default_rng(),data_scale=1,seed_size=0.01,population=100000,state_size=4,estimated_params=[]))
+                         context=Context(population=100000,state_size=4))
 algo.initialize()
 
 
-algo.run(RunInfo(np.array(real_beta),0))
+out = algo.run(RunInfo(np.array(real_beta),0))
+#plot(out,0)
+
 
 
 

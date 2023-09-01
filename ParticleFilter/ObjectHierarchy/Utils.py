@@ -27,14 +27,14 @@ class Particle:
 
 @dataclass(frozen=True)
 class Context: 
-    particle_count: int
-    clock: Clock
-    rng:random.Generator
-    data_scale:int #optional param to indicate the scale of the data i.e. the number number of days between each data point
-    seed_size: float #estimate of initial percentage of infected out of the total population
-    population: int #estimate of the total population 
-    state_size: int #number of state variables in the model 
-    estimated_params: List[str] #number of estimated parameters in the model 
+    particle_count: int = 1000
+    clock: Clock = field(default_factory=lambda: Clock())
+    rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
+    data_scale:int = 1 #optional param to indicate the scale of the data i.e. the number number of days between each data point
+    seed_size: float = 0.01 #estimate of initial percentage of infected out of the total population
+    population: int = 100000 #estimate of the total population 
+    state_size: int = 4 #number of state variables in the model 
+    estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
 
 
 def timing(f):
@@ -48,9 +48,9 @@ def timing(f):
         return result
     return wrap
 
-def quantiles(sim_obvs:List)->List: 
+def quantiles(item:List)->List: 
         qtlMark = 1.00*np.array([0.010, 0.025, 0.050, 0.100, 0.150, 0.200, 0.250, 0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.800, 0.850, 0.900, 0.950, 0.975, 0.990])
-        return list(np.quantile(sim_obvs, qtlMark))
+        return list(np.quantile(item, qtlMark))
 
 
 

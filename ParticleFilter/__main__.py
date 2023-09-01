@@ -17,7 +17,6 @@ def beta(t):
       return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
 
 
-
 def main():
     
     params = {"beta":beta,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0}
@@ -82,9 +81,9 @@ def main():
 
 
 
-    plot(out,0)  
-    # plot(out,1)   
-    #plot(out,2) 
+    #plot(out,0)  
+    plot(out,1)   
+    plot(out,2) 
 
 
 

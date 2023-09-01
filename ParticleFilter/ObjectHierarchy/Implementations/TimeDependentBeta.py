@@ -37,7 +37,12 @@ class TimeDependentAlgo(Algorithm):
     @timing
     def run(self,info:RunInfo) ->Output:
 
-        output = Output(beta_qtls=list(),observation_qtls=list())
+
+        '''field initializations for Output'''
+        output = Output(observation_data=info.observation_data)
+        
+
+
         while self.context.clock.time < len(info.observation_data): 
             self.particles = self.integrator.propagate(self.particles)
 
@@ -47,12 +52,13 @@ class TimeDependentAlgo(Algorithm):
             self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
 
             '''output updates, not part of the main algorithm'''
-            output.beta_qtls.append(quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)]))
-            output.observation_qtls.append(quantiles([particle.observation for _,particle in enumerate(self.particles)]))
+            output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
+            output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
 
             self.context.clock.tick()
             print(f"iteration: {self.context.clock.time}")
 
+        print(output.beta_qtls)
         return output
     
 
