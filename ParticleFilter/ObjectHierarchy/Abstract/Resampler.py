@@ -4,7 +4,7 @@ import numpy as np
 from numpy import float_,int_
 from types import FunctionType,BuiltinFunctionType
 from typing import List
-from ObjectHierarchy.Utils import Context,Particle
+from ObjectHierarchy.utilities.Utils import Context,Particle
 from copy import deepcopy
 
 class Resampler(ABC): 

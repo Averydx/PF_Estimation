@@ -1,6 +1,6 @@
 from abc import ABC,abstractmethod
 from typing import Dict,List
-from ObjectHierarchy.Utils import Particle,Context
+from ObjectHierarchy.utilities.Utils import Particle,Context
 
 class Perturb(ABC): 
     hyperparameters: Dict

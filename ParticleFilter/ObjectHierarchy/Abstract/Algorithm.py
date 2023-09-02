@@ -5,8 +5,8 @@ from typing import List,Dict
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
-from ObjectHierarchy.Output import Output
-from ObjectHierarchy.Utils import RunInfo,Particle,Context,Clock
+from ObjectHierarchy.utilities.Output import Output
+from ObjectHierarchy.utilities.Utils import RunInfo,Particle,Context,Clock
 import matplotlib.pyplot as plt
 import numpy as np
 from copy import deepcopy
@@ -19,11 +19,12 @@ class Algorithm(ABC):
     particles: List[Particle]
     context: Context
 
-    def __init__(self,integrator:Integrator,perturb:Perturb,resampler:Resampler)->None:
+    def __init__(self,integrator:Integrator,perturb:Perturb,resampler:Resampler,context:Context)->None:
         self.integrator = integrator
         self.perturb = perturb
         self.resampler = resampler
         self.particles = []
+        self.context = context
 
 
 

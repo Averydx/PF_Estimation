@@ -1,0 +1,34 @@
+from ObjectHierarchy.Implementations.algorithms.IF2 import IF2
+from ObjectHierarchy.utilities.Output import Output
+from ObjectHierarchy.utilities.plotting import plot
+from ObjectHierarchy.utilities.Utils import RunInfo,Context
+from ObjectHierarchy.Implementations.solvers.DeterministicSolvers import Euler
+from ObjectHierarchy.Implementations.perturbers.perturbers import DiscretePerturbations
+from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResample
+from scipy.stats import poisson
+from numpy.typing import NDArray
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt 
+
+real_beta = pd.read_csv('./data_sets/FLU_HOSPITALIZATIONS.csv')
+real_beta = np.squeeze(real_beta.to_numpy()) 
+real_beta = np.delete(real_beta,0,1)
+
+np.set_printoptions(suppress=True)
+solver = Euler()
+perturb = DiscretePerturbations({"sigma1":0.01,"sigma2":0.02,"a":0.5})
+resample = PoissonResample()
+
+algo = IF2(integrator=solver,
+                         perturb=perturb,
+                         resampler=resample,
+                         context=Context(population=100000,state_size=4))
+algo.initialize({"beta":-1,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0})
+
+
+out = algo.run(RunInfo(np.array(real_beta),0))
+plot(out,0)
+
+
+
