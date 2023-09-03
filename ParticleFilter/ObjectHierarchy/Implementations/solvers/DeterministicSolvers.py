@@ -4,7 +4,7 @@ from typing import List
 import numpy as np
 
 
-class Euler(Integrator): 
+class EulerSolver(Integrator): 
     def __init__(self) -> None:
         super().__init__()
 

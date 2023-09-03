@@ -4,6 +4,26 @@ import numpy as np
 from utilities.utility import multivariate_normal
 from ObjectHierarchy.utilities.Utils import Context,Particle
 
+
+'''BROKEN'''
+class ParamOnlyMultivariate(Perturb): 
+    def __init__(self,params:Dict) -> None:
+        super().__init__(params)
+
+    def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
+
+        A = np.linalg.cholesky(self.hyperparameters['cov'])
+        for i,_ in enumerate(particleArray): 
+            perturbed = np.log([particleArray[i].param[name] for name in ctx.estimated_params])
+            perturbed = np.exp(multivariate_normal(perturbed,A))
+
+            for j,name in enumerate(ctx.estimated_params): 
+                particleArray[i].param[name] = perturbed[j]
+
+        
+
+        return particleArray
+
 '''Multivariate normal perturbations to all parameters and state variables after log transform'''
 class MultivariatePerturbations(Perturb): 
     def __init__(self,params:Dict) -> None:
@@ -44,10 +64,19 @@ class DiscretePerturbations(Perturb):
         super().__init__(params)
 
     def randomly_perturb(self, ctx: Context, particleArray: List[Particle]) -> List[Particle]:
-        
-        #var = variance(np.array([particle.param['beta'] for particle in particleArray]))
-        for j,particle in enumerate(particleArray): 
-            particleArray[j].param['beta'] = ctx.rng.normal(particle.param['beta'],
-            self.hyperparameters['sigma2'] * self.hyperparameters['a'] ** ((2*ctx.additional_hyperparameters['m'])/50))
+        match np.shape(self.hyperparameters['cov']): 
+            case (): 
+                for j,particle in enumerate(particleArray): 
+                    particleArray[j].param[ctx.estimated_params[0]] = ctx.rng.normal(particle.param[ctx.estimated_params[0]],
+                    self.hyperparameters['cov'] * self.hyperparameters['a'] ** ((2*ctx.additional_hyperparameters['m'])/50))
+            
+            case _: 
+                for j,particle in enumerate(particleArray): 
+                    out = ctx.rng.multivariate_normal([particle.param[x] for x in ctx.estimated_params],
+                                                      self.hyperparameters['cov'] * self.hyperparameters['a'] ** ((2*ctx.additional_hyperparameters['m'])/50))
+                    
+                    for i,name in enumerate(ctx.estimated_params): 
+                        particleArray[j].param[name] = out[i]
+
 
         return particleArray

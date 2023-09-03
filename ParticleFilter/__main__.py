@@ -11,18 +11,17 @@ from ParticleFilter.utilities.user_data_gen import GenerateSimData
 
 def beta(t):
         
-    betaMax1=0.1
-    theta=0
+        x1 =0.1
+        x2 = 0.7
 
-    #   return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
-    return 0.1
+        return 0.05* np.exp(0.1425*x1 + 0.5875*x2)
 
 
 def main():
     
     params = {"beta":beta,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0}
     
-    initial_state = np.array([100000 ,1000,0,0]) 
+    initial_state = np.array([7000000 ,70000,0,0]) 
 
     time_series = 343
 

@@ -9,6 +9,7 @@ from ObjectHierarchy.utilities.Output import Output
 from ObjectHierarchy.utilities.Utils import RunInfo,Particle,Context,Clock
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 from copy import deepcopy
 
 class Algorithm(ABC): 
@@ -18,6 +19,8 @@ class Algorithm(ABC):
     resampler: Resampler
     particles: List[Particle]
     context: Context
+    output_flags: Dict
+    output: Output
 
     def __init__(self,integrator:Integrator,perturb:Perturb,resampler:Resampler,context:Context)->None:
         self.integrator = integrator
@@ -25,7 +28,8 @@ class Algorithm(ABC):
         self.resampler = resampler
         self.particles = []
         self.context = context
-
+        self.output = Output(np.array([]))
+        self.output_flags = {}
 
 
     '''Abstract Methods''' 
@@ -53,6 +57,11 @@ class Algorithm(ABC):
     def print_particles(self): 
         for i,particle in enumerate(self.particles): 
             print(f"{i}: {particle}")
+
+    def clean_up(self): 
+        if self.output_flags['write'] is True: 
+            pd.DataFrame(self.output.average_beta).to_csv('./output/average_beta.csv')
+
 
 
     

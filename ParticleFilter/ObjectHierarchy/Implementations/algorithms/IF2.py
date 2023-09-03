@@ -29,7 +29,13 @@ class IF2(Algorithm):
 
     '''Algorithm run implementation, runs the M and N loops'''
     def run(self, info: RunInfo) -> Output:
-        for m in range(0,400): 
+
+        '''field initializations for Output'''
+        self.output = Output(observation_data=info.observation_data)
+        self.output_flags = info.output_flags
+
+
+        for m in range(0,200): 
 
             '''operations of M loop are setting the value of m in the hyperparameters, randomly perturbing the params and reseting the state and observation values'''
             self.context.additional_hyperparameters['m'] = m
@@ -48,6 +54,8 @@ class IF2(Algorithm):
                 #print(f"M:{m} N: {self.context.clock.time}")
 
             print(f"Iteration:{m} beta: {np.mean([particle.param['beta'] for particle in self.particles])}")
+
+        self.clean_up()
         return Output(np.array([]))
 
 

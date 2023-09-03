@@ -13,7 +13,7 @@ import numpy as np
 
 from ObjectHierarchy.utilities.Utils import Context
 
-class TimeDependentAlgo(Algorithm): 
+class TB_SDH(Algorithm): 
 
     def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler,context:Context) -> None:
         super().__init__(integrator, perturb, resampler,context)
@@ -29,11 +29,17 @@ class TimeDependentAlgo(Algorithm):
         for i in range(self.context.particle_count): 
             '''initialize all other estimated parameters here'''
 
-            beta = self.context.rng.uniform(0.,1.)
-            self.particles[i].param['beta'] = beta
+            a0 = self.context.rng.uniform(0.,1.)
+            a1 = self.context.rng.uniform(0.,1.)
+            a2 = self.context.rng.uniform(0.,1.)
 
-        
-    @timing
+            self.particles[i].param['a0'] = a0
+            self.particles[i].param['a1'] = a1
+            self.particles[i].param['a2'] = a2
+
+            self.particles[i].param['beta'] = self.particles[i].param['a0'] * np.exp(self.particles[i].param['a1'] * self.particles[i].param['x1'] + self.particles[i].param['a2'] * self.particles[i].param['x2'])
+
+
     def run(self,info:RunInfo) ->Output:
 
 
@@ -50,18 +56,20 @@ class TimeDependentAlgo(Algorithm):
 
             self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
 
-            '''output updates, not part of the main algorithm'''
-            self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
-            self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
-            self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
+            for particle in self.particles: 
+                particle.param['beta'] = particle.param['a0'] * np.exp(particle.param['a1'] * particle.param['x1'] + particle.param['a2'] * particle.param['x2'])
+
+
 
             self.context.clock.tick()
             #print(f"iteration: {self.context.clock.time}")
-            print(f"variance of beta: {variance(np.array([particle.param['beta'] for particle in self.particles]))}")
+            print(f"Average a0: {np.mean(([particle.param['a0'] for particle in self.particles]))}")
+            print(f"Average a1: {np.mean(([particle.param['a1'] for particle in self.particles]))}")
+            print(f"Average a2: {np.mean(([particle.param['a2'] for particle in self.particles]))}\n")
+
+
 
         self.clean_up()
         return self.output
     
 
-
-    

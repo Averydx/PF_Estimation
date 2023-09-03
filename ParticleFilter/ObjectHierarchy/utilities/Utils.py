@@ -11,6 +11,7 @@ from time import perf_counter
 class RunInfo: 
     observation_data: NDArray[int_] #Array of observation data that will be passed to the Algorithm, dimension agnostic 
     forecast_time:int # optional param to indicate the amount of time series to forecast 
+    output_flags: Dict #param to check if writing to file
 
 
 '''Internal clock for keeping track of the time the algorithm is at in the observation data'''
