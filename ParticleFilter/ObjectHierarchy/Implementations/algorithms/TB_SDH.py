@@ -43,6 +43,9 @@ class TB_SDH(Algorithm):
     def run(self,info:RunInfo) ->Output:
 
 
+        a0s = []
+        a1s = []
+        a2s = []
         '''field initializations for Output'''
         self.output = Output(observation_data=info.observation_data)
         self.output_flags = info.output_flags
@@ -59,16 +62,22 @@ class TB_SDH(Algorithm):
             for particle in self.particles: 
                 particle.param['beta'] = particle.param['a0'] * np.exp(particle.param['a1'] * particle.param['x1'] + particle.param['a2'] * particle.param['x2'])
 
-
+            '''output updates, not part of the main algorithm'''
+            self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
+            self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
+            self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
 
             self.context.clock.tick()
-            #print(f"iteration: {self.context.clock.time}")
-            print(f"Average a0: {np.mean(([particle.param['a0'] for particle in self.particles]))}")
-            print(f"Average a1: {np.mean(([particle.param['a1'] for particle in self.particles]))}")
-            print(f"Average a2: {np.mean(([particle.param['a2'] for particle in self.particles]))}\n")
+            print(f"iteration: {self.context.clock.time}")
+            a0s.append(np.mean(([particle.param['a0'] for particle in self.particles])))
+            a1s.append(np.mean(([particle.param['a1'] for particle in self.particles])))
+            a2s.append(np.mean(([particle.param['a2'] for particle in self.particles])))
 
 
-
+        print("OUTPUT: ")
+        print(f"a0: {np.mean(a0s)}")
+        print(f"a1: {np.mean(a1s)}")
+        print(f"a2: {np.mean(a2s)}")
         self.clean_up()
         return self.output
     

@@ -16,16 +16,16 @@ real_beta = np.delete(real_beta,0,1)
 np.set_printoptions(suppress=True)
 solver = EulerSolver()
 perturb = ParamOnlyMultivariate({"cov":np.diag([0.01,0.01,0.01]),"a":0.5})
-resample = NormResample(var = 10)
+resample = PoissonResample()
 
 algo = TB_SDH(integrator=solver,
                          perturb=perturb,
                          resampler=resample,
-                         context=Context(population=7000000,state_size=4,particle_count=10000))
+                         context=Context(population=7000000,state_size=4,particle_count=1000))
 algo.initialize({"beta":0,"a0":-1,"a1":-1,"a2":-1,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0,"x1":0.1,"x2":0.7})
 
 
 out = algo.run(RunInfo(np.array(real_beta),0,output_flags={'write': True}))
-#plot(out,0)
+plot(out,0)
 
 

@@ -5,7 +5,7 @@ from utilities.utility import multivariate_normal
 from ObjectHierarchy.utilities.Utils import Context,Particle
 
 
-'''BROKEN'''
+'''Multivariate geometric perturbations to the parameters only, not the state'''
 class ParamOnlyMultivariate(Perturb): 
     def __init__(self,params:Dict) -> None:
         super().__init__(params)
