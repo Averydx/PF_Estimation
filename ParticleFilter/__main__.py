@@ -11,10 +11,10 @@ from ParticleFilter.utilities.user_data_gen import GenerateSimData
 
 def beta(t):
         
-        x1 =0.1
-        x2 = 0.7
+    betaMax1=0.1
+    theta=0
 
-        return 0.05* np.exp(0.1425*x1 + 0.5875*x2)
+    return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
 
 
 def main():

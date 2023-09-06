@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"name": "PF_Estimation",
+			"path": ".."
+		},
+		{
+			"path": "../../../Epymorph-PF2/Epymorph"
+		}
+	],
+	"settings": {}
+}

@@ -1,33 +1,66 @@
-from typing import Dict, List
-import numpy as np
+from typing import Dict
+from epymorph.data import geo_library, ipm_library, mm_library
+from epymorph.context import Compartments, SimDType
 from ObjectHierarchy.Abstract.Algorithm import Algorithm
-from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Integrator import Integrator
+from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
-from ObjectHierarchy.utilities.Utils import Context, Particle, RunInfo,variance,quantiles
+from ObjectHierarchy.utilities.Utils import Context,Particle, RunInfo,quantiles
+
+import numpy as np
 
 
-'''Implementation of the IF2 algorithm from Ionides et. al.'''
-class IF2(Algorithm): 
-    def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler,context:Context) -> None:
-        super().__init__(integrator, perturb, resampler,context)
 
+class Epymorph_IF2(Algorithm): 
+    def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler, context: Context) -> None:
+        super().__init__(integrator, perturb, resampler, context)
 
-    '''One time initializer, call before the first M loop'''
     def initialize(self, params: Dict) -> None:
-        super().initialize(params)
-                #initialization of the estimated parameters will be done in the override
+
+        '''Initialize list of estimated parameters '''
+        for _,(key,val) in enumerate(params.items()): 
+            if val == -1: 
+                self.context.estimated_params.append(key)
+
+
+        for i in range(self.context.particle_count): 
+            
+            '''Populate the initial state of each node using the population key of geo.data'''
+            geo = geo_library['pei']()
+            pop = geo.data['population'] 
+
+            '''Draw a random int to represent the initial infected'''
+            initial_infected = self.context.rng.integers(0,np.round(self.context.seed_size*self.context.population))
+
+            state = np.array([
+            [pop[0] - initial_infected, initial_infected, 0],
+            [pop[1], 0, 0],
+            [pop[2], 0, 0],
+            [pop[3], 0, 0],
+            [pop[4], 0, 0],
+            [pop[5], 0, 0],
+        ], dtype=SimDType)
+            
+            '''Create the particle array '''
+            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=np.array([0 for _ in state])))
+
         for i in range(self.context.particle_count): 
             '''initialize all other estimated parameters here'''
-
             beta = self.context.rng.uniform(0.,1.)
             self.particles[i].param['beta'] = beta
 
+        '''method to reset the state and observations of the particles after each iteration of M loop, preserving the params'''
+    def M_iteration_reset(self): 
+        for particle in self.particles:
+            particle.observation = np.array([0])
+            initial_infected = self.context.rng.uniform(0,self.context.seed_size*self.context.population)
+            state = np.concatenate((np.array([self.context.population-initial_infected,initial_infected]),[0 for _ in range(self.context.state_size-2)])) #SIRH model 
+            particle.state = state
+            self.context.clock.time = 0
 
 
 
-    '''Algorithm run implementation, runs the M and N loops'''
     def run(self, info: RunInfo) -> Output:
 
         '''field initializations for Output'''
@@ -64,16 +97,4 @@ class IF2(Algorithm):
         return Output(np.array([]))
 
 
-
-
-
-    '''method to reset the state and observations of the particles after each iteration of M loop, preserving the params'''
-    def M_iteration_reset(self): 
-        for particle in self.particles:
-            particle.observation = np.array([0])
-            initial_infected = self.context.rng.uniform(0,self.context.seed_size*self.context.population)
-            state = np.concatenate((np.array([self.context.population-initial_infected,initial_infected]),[0 for _ in range(self.context.state_size-2)])) #SIRH model 
-            particle.state = state
-            self.context.clock.time = 0
-
-
+        

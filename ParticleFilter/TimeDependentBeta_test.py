@@ -1,20 +1,21 @@
 from ObjectHierarchy.Implementations.algorithms.TimeDependentBeta import *
 from ObjectHierarchy.utilities.plotting import plot
 from ObjectHierarchy.utilities.Utils import RunInfo
-from ObjectHierarchy.Implementations.solvers.StochasticSolvers import PoissonSolver
+from ObjectHierarchy.Implementations.solvers.DeterministicSolvers import EulerSolver
+
 from ObjectHierarchy.Implementations.perturbers.perturbers import MultivariatePerturbations
 from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResample,NormResample
 import numpy as np
 import pandas as pd
 
-real_beta = pd.read_csv('./data_sets/beta_test.csv')
+real_beta = pd.read_csv('./data_sets/FLU_HOSPITALIZATIONS.csv')
 real_beta = np.squeeze(real_beta.to_numpy()) 
 real_beta = np.delete(real_beta,0,1)
 
 np.set_printoptions(suppress=True)
 # euler = Euler()
-poisson_solver = PoissonSolver()
-perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.1})
+poisson_solver = EulerSolver()
+perturb = MultivariatePerturbations(params={"sigma1":0.1,"sigma2":0.1})
 resample = PoissonResample()
 
 algo = TimeDependentAlgo(integrator=poisson_solver,

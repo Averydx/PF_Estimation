@@ -8,7 +8,9 @@ from numpy.typing import NDArray
 
 '''Likelihood functions'''
 def likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDArray: 
-    return poisson.pmf(k=observation,mu=particle_observations)
+    if particle_observations[0].size == 1: 
+        return poisson.pmf(k=observation,mu=particle_observations)
+    return np.array([])
 
 def likelihood_NB(observation,particle_observations:NDArray[np.int_],var: float)->NDArray: 
     X = np.zeros_like(particle_observations)
@@ -113,3 +115,4 @@ class PoissonResample(Resampler):
     
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
+    

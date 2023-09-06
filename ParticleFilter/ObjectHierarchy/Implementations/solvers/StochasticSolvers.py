@@ -1,6 +1,9 @@
 '''Stochastic analog to the euler solver for Alex and Kayodes SIRH model'''
 from ObjectHierarchy.utilities.Utils import Particle,Context
 from ObjectHierarchy.Abstract.Integrator import Integrator
+from epymorph.data import geo_library,ipm_library,mm_library
+from epymorph.context import Compartments, SimDType
+from epymorph.simulation import Simulation
 from typing import List
 import numpy as np
 
@@ -27,5 +30,15 @@ class PoissonSolver(Integrator):
 
             particleArray[j].state = state
             particleArray[j].observation = new_hospitalized
+
+        return particleArray
+    
+class EpymorphSolver(Integrator): 
+    def propagate(self, particleArray: List[Particle], ctx: Context) -> List[Particle]:
+        geo = geo_library['pei']()
+        for j,particle in enumerate(particleArray): 
+            list(np.array(particle.state,dtype=SimDType))
+        
+
 
         return particleArray
