@@ -52,9 +52,8 @@ def plot(out:Output,graph:int):
             PSD = np.abs(f_hat/t)
             freq = 1/t  * np.arange(t)
 
-            indices = PSD > 0.01
+            indices = PSD>0.02
 
-            PSD_clean = PSD * indices
             f_hat = indices * f_hat
             f_clean = np.fft.ifft(f_hat)
 

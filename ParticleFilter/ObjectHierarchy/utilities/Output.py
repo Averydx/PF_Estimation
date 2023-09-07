@@ -15,7 +15,7 @@ class Output:
         object.__setattr__(self, 'time_series', len(self.observation_data))
         object.__setattr__(self,'beta_qtls', np.zeros((23,self.time_series)))
         object.__setattr__(self,'observation_qtls', np.zeros((23,self.time_series)))   
-        object.__setattr__(self,'average_beta',np.zeros(self.time_series))     
+        object.__setattr__(self,'average_beta',np.zeros(self.time_series))  
 
 
         

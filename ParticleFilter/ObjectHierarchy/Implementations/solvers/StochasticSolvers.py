@@ -3,7 +3,7 @@ from ObjectHierarchy.utilities.Utils import Particle,Context
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from epymorph.data import geo_library,ipm_library,mm_library
 from epymorph.context import Compartments, SimDType
-from epymorph.simulation import Simulation
+from particle_simulation import ParticleSimulation
 from typing import List
 import numpy as np
 
@@ -35,10 +35,31 @@ class PoissonSolver(Integrator):
     
 class EpymorphSolver(Integrator): 
     def propagate(self, particleArray: List[Particle], ctx: Context) -> List[Particle]:
-        geo = geo_library['pei']()
+        geo=geo_library['pei']()
+        ipm_builder = ipm_library['sirs']()
+        mvm_builder = mm_library['pei']()
         for j,particle in enumerate(particleArray): 
-            list(np.array(particle.state,dtype=SimDType))
-        
+            param = particle.param
+            compartments = particle.state
+
+            sim = ParticleSimulation(
+                geo=geo,
+                ipm_builder=ipm_builder,
+                mvm_builder=mvm_builder,
+                tick_index = 0,
+                param=param, 
+                compartments=compartments
+            )
+
+            incidence = sim.step() + sim.step()
+
+            #TODO need to think on this 
+            particleArray[j].observation = incidence
+            particleArray[j].state = 
+            # print(f"{sim.get_compartments()}")
+            # print("\n")
+
+            
 
 
         return particleArray

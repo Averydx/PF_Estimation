@@ -54,10 +54,12 @@ class TimeDependentAlgo(Algorithm):
             self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
             self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
             self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
+            print(([particle.state for _,particle in enumerate(self.particles)]))
+
+
 
             self.context.clock.tick()
             #print(f"iteration: {self.context.clock.time}")
-            print(f"variance of beta: {variance(np.array([particle.param['beta'] for particle in self.particles]))}")
 
         self.clean_up()
         return self.output
