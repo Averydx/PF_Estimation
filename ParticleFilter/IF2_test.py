@@ -21,12 +21,12 @@ resample = PoissonResample()
 algo = IF2(integrator=solver,
                          perturb=perturb,
                          resampler=resample,
-                         context=Context(population=7000000,state_size=4,additional_hyperparameters={"m":1}))
+                         context=Context(population=7000000,state_size=4,additional_hyperparameters={"m":200}))
 algo.initialize({"beta":-1,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0})
 
 
 out = algo.run(RunInfo(np.array(real_beta),0,output_flags={'write': True}))
-plot(out,0)
+#plot(out,0)
 
 
 

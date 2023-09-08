@@ -54,12 +54,12 @@ class EpymorphSolver(Integrator):
             incidence = sim.step() + sim.step()
 
             #TODO need to think on this 
-            particleArray[j].observation = incidence
-            particleArray[j].state = 
-            # print(f"{sim.get_compartments()}")
+            particleArray[j].observation = incidence[:,0]
+            #particleArray[j].state = sim.get_compartments()
+            print(f"{sim.get_compartments()}")
             # print("\n")
 
-            
+        return particleArray
 
 
         return particleArray

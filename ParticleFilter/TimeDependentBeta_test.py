@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
-real_beta = pd.read_csv('./data_sets/FLU_HOSPITALIZATIONS.csv')
+real_beta = pd.read_csv('./data_sets/beta_test.csv')
 real_beta = np.squeeze(real_beta.to_numpy()) 
 real_beta = np.delete(real_beta,0,1)
 

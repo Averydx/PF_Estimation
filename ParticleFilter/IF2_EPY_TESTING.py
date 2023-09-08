@@ -25,9 +25,11 @@ algo = Epymorph_IF2(integrator=solver,
 
 
 algo.initialize({"beta":-1,"gamma":0.25,"xi":1/90,"theta":0.1,"move_control": 0.9})
-algo.integrator.propagate(particleArray=algo.particles,ctx=algo.context)
+algo.particles = algo.integrator.propagate(particleArray=algo.particles,ctx=algo.context)
 for i,particle in enumerate(algo.particles): 
     print(f"Particle {i}:{particle.observation}\n")
+    print(f"{particle.state}")
+
 
 
 #algo.print_particles()

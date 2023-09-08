@@ -15,6 +15,7 @@ def beta(t):
     theta=0
 
     return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
+    #return 0.1
 
 
 def main():
