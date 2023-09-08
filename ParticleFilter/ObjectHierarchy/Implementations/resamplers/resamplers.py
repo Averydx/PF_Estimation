@@ -52,36 +52,36 @@ class NormResample(Resampler):
         return super().resample(weights, ctx,particleArray)
     
 #TODO Fix this 
-# '''Resampler using the negative binomial probability mass function to compute the weights'''
-# class NBResample(Resampler):
+'''Resampler using the negative binomial probability mass function to compute the weights'''
+class NBResample(Resampler):
 
-#     observations: NDArray[np.int_]
+    observations: NDArray[np.int_]
 
-#     def __init__(self,observations:NDArray[np.int_]) -> None:
-#         super().__init__(likelihood_NB)
-#         self.observations = observations
+    def __init__(self,observations:NDArray[np.int_]) -> None:
+        super().__init__(likelihood_NB)
+        self.observations = observations
 
-#     def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
+    def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
 
-#         weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray],var))
-
-
-#         for j in range(len(particleArray)):  
-#             if(weights[j] == 0):
-#                 weights[j] = 10**-300 
-#             elif(np.isnan(weights[j])):
-#                 weights[j] = 10**-300
-#             elif(np.isinf(weights[j])):
-#                 weights[j] = 10**-300
+        weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray]))
 
 
-#         weights = weights/np.sum(weights)
+        for j in range(len(particleArray)):  
+            if(weights[j] == 0):
+                weights[j] = 10**-300 
+            elif(np.isnan(weights[j])):
+                weights[j] = 10**-300
+            elif(np.isinf(weights[j])):
+                weights[j] = 10**-300
+
+
+        weights = weights/np.sum(weights)
 
         
-#         return np.squeeze(weights)
+        return np.squeeze(weights)
     
-#     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
-#         return super().resample(weights, ctx,particleArray)
+    def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
+        return super().resample(weights, ctx,particleArray)
 
 
 '''Resampler using the poisson probability mass function to compute the weights'''
