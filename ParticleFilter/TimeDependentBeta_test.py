@@ -4,7 +4,7 @@ from ObjectHierarchy.utilities.Utils import RunInfo
 from ObjectHierarchy.Implementations.solvers.DeterministicSolvers import EulerSolver
 from ObjectHierarchy.Implementations.solvers.StochasticSolvers import PoissonSolver
 from ObjectHierarchy.Implementations.perturbers.perturbers import MultivariatePerturbations
-from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResample,NormResample
+from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResample,NormResample,NBResample
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -17,7 +17,7 @@ np.set_printoptions(suppress=True)
 # euler = Euler()
 solver = PoissonSolver()
 perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.1})
-resample = PoissonResample()
+resample = NBResample(10)
 
 algo = TimeDependentAlgo(integrator=solver,
                          perturb=perturb,
