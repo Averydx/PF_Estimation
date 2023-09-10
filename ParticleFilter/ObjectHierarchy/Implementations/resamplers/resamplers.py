@@ -22,7 +22,7 @@ def likelihood_normal(observation,particle_observations:NDArray[np.int_],var)->N
     return norm.pdf(observation,loc=particle_observations,scale=var)
 
 def joint_likelihood_poisson(observation:NDArray[np.int_],particle_observations:NDArray[np.int_]): 
-    return np.prod(poisson.pmf(k=observation,mu=particle_observations))
+    return 
 
 
 '''Resampler using the normal probability density function to compute the weights'''
@@ -52,7 +52,6 @@ class NormResample(Resampler):
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
     
-#TODO Fix this 
 '''Resampler using the negative binomial probability mass function to compute the weights'''
 class NBResample(Resampler):
 
@@ -117,14 +116,15 @@ class PoissonResample(Resampler):
     
 '''Used for multi-dimensional likelihood computation in Epymorph estimation problems'''
 class JointPoissonResample(Resampler): 
-    def __init__(self, joint_likelihood_poisson) -> None:
-        super().__init__(joint_likelihood_poisson)
+    def __init__(self) -> None:
+        super().__init__(likelihood_poisson)
 
     #TODO Debug invalid weights in divide 
-    def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
-
-        weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray]))
-
+    def compute_weights(self, observation: NDArray[np.int_], particleArray:List[Particle]) -> NDArray[np.float_]:
+        weights = np.zeros(len(particleArray))
+        
+        for i,particle in enumerate(particleArray):
+            weights[i] = (np.prod(poisson.pmf(k=observation,mu=particle.observation)))
 
         for j in range(len(particleArray)):  
             if(weights[j] == 0):
@@ -134,8 +134,10 @@ class JointPoissonResample(Resampler):
             elif(np.isinf(weights[j])):
                 weights[j] = 10**-300
 
-
         weights = weights/np.sum(weights)
+
+
+        
 
         
         return np.squeeze(weights)

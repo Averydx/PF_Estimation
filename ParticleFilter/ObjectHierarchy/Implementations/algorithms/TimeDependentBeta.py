@@ -8,6 +8,7 @@ from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
 from ObjectHierarchy.utilities.Utils import *
 from utilities.utility import multivariate_normal
+import matplotlib.pyplot as plt
 from typing import Tuple,List,Dict
 import numpy as np
 
@@ -46,7 +47,7 @@ class TimeDependentAlgo(Algorithm):
             self.particles = self.integrator.propagate(self.particles,self.context)
 
             weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
-
+            print(weights)
             self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
 
             self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
@@ -55,12 +56,12 @@ class TimeDependentAlgo(Algorithm):
             self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
             self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
             self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
-
-
+            self.output.average_state[self.context.clock.time,:]=np.mean([particle.state for particle in self.particles],axis=0)
+            
 
             self.context.clock.tick()
             #print(f"iteration: {self.context.clock.time}")
-
+        plt.show()
         self.clean_up()
         return self.output
     
