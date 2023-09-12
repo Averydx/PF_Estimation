@@ -34,7 +34,7 @@ class PoissonSolver(Integrator):
         return particleArray
     
 class EpymorphSolver(Integrator): 
-    def propagate(self, particleArray: List[Particle], ctx: Context) -> List[Particle]:
+    def propagate(self, particleArray: List[Particle], ctx: Context,tick_index) -> List[Particle]:
         geo=geo_library['pei']()
         ipm_builder = ipm_library['sirs']()
         mvm_builder = mm_library['pei']()
@@ -46,7 +46,7 @@ class EpymorphSolver(Integrator):
                 geo=geo,
                 ipm_builder=ipm_builder,
                 mvm_builder=mvm_builder,
-                tick_index = 0,
+                tick_index = tick_index,
                 param=param, 
                 compartments=compartments
             )

@@ -32,7 +32,7 @@ class Epymorph_IF2(Algorithm):
 
             '''Draw a random int to represent the initial infected'''
             initial_infected = self.context.rng.integers(0,np.round(self.context.seed_size*self.context.population))
-
+            #initial_infected = 10000
             state = np.array([
             [pop[0] - initial_infected, initial_infected, 0],
             [pop[1], 0, 0],
@@ -65,12 +65,12 @@ class Epymorph_IF2(Algorithm):
                 weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
                 self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
 
-                #self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
+                self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
 
-                '''output updates, not part of the main algorithm'''
-                self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
-                self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
-                self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
+                # '''output updates, not part of the main algorithm'''
+                # self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
+                # self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
+                print(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)]))
 
 
 

@@ -1,7 +1,7 @@
 from ObjectHierarchy.utilities.Utils import Particle,Context
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Utils import variance
-from scipy.stats import poisson,nbinom,norm
+from scipy.stats import poisson,nbinom,norm,multivariate_normal
 from typing import List
 import numpy as np
 from numpy.typing import NDArray
@@ -21,8 +21,8 @@ def likelihood_NB(observation,particle_observations:NDArray[np.int_],var:float)-
 def likelihood_normal(observation,particle_observations:NDArray[np.int_],var)->NDArray: 
     return norm.pdf(observation,loc=particle_observations,scale=var)
 
-def joint_likelihood_poisson(observation:NDArray[np.int_],particle_observations:NDArray[np.int_]): 
-    return 
+def joint_likelihood_normal(observation:NDArray[np.int_],particle_observations:NDArray[np.int_],cov:int): 
+    return multivariate_normal.pdf(observation,mean = particle_observations,cov = cov)
 
 
 '''Resampler using the normal probability density function to compute the weights'''
@@ -114,17 +114,20 @@ class PoissonResample(Resampler):
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
     
-'''Used for multi-dimensional likelihood computation in Epymorph estimation problems'''
-class JointPoissonResample(Resampler): 
+class MultivariateNormalResample(Resampler):
+
     def __init__(self) -> None:
         super().__init__(likelihood_poisson)
 
-    #TODO Debug invalid weights in divide 
-    def compute_weights(self, observation: NDArray[np.int_], particleArray:List[Particle]) -> NDArray[np.float_]:
-        weights = np.zeros(len(particleArray))
-        
+
+#TODO Debug invalid weights in divide 
+    def compute_weights(self, observation: NDArray, particleArray:List[Particle]) -> NDArray[np.float_]:
+        p_obvs = np.array([particle.observation for particle in particleArray])
+        #cov = np.cov(p_obvs.T)
+        cov =10000000
+        weights = np.zeros(len(p_obvs))
         for i,particle in enumerate(particleArray):
-            weights[i] = (np.prod(poisson.pmf(k=observation,mu=particle.observation)))
+            weights[i] = multivariate_normal.pdf(observation,mean =particle.observation,cov=cov,allow_singular=True)
 
         for j in range(len(particleArray)):  
             if(weights[j] == 0):
@@ -134,13 +137,16 @@ class JointPoissonResample(Resampler):
             elif(np.isinf(weights[j])):
                 weights[j] = 10**-300
 
+
         weights = weights/np.sum(weights)
 
-
         
-
         
+            
         return np.squeeze(weights)
     
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
+    
+
+    
