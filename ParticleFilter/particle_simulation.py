@@ -43,7 +43,7 @@ class ParticleSimulation:
 
     '''Returns the compartment totals for each population'''
     def get_compartments(self) ->Compartments: 
-        return np.array([loc.get_compartments for loc in self.mve.get_locations()])
+        return np.array([loc.get_compartments() for loc in self.mve.get_locations()])
     
     '''Advances the simulation by one tau-step. 
     Returns new event counts by population: (N,E)

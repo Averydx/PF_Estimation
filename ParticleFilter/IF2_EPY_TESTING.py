@@ -7,8 +7,10 @@ from ObjectHierarchy.Implementations.solvers.DeterministicSolvers import EulerSo
 from ObjectHierarchy.Implementations.perturbers.perturbers import DiscretePerturbations
 from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResample,NormResample,JointPoissonResample
 from scipy.stats import poisson,norm
+from time import perf_counter
 import numpy as np
 import pandas as pd
+import tracemalloc
 
 real_beta = pd.read_csv('./data_sets/epymorph_incidence_sum.csv')
 real_beta = np.squeeze(real_beta.to_numpy()) 
@@ -26,14 +28,24 @@ algo = Epymorph_IF2(integrator=solver,
 
 
 algo.initialize({"beta":-1,"gamma":0.25,"xi":1/90,"theta":0.1,"move_control": 0.9})
-algo.particles = algo.integrator.propagate(ctx=algo.context,particleArray=algo.particles)
+
+tracemalloc.start()
+t1 = perf_counter()
+for i in range(150):
+     algo.particles = algo.integrator.propagate(ctx=algo.context,particleArray=algo.particles)
+     print(f"iteration: {i}")
+t2 = perf_counter()
+
+print(f"memory usage: {tracemalloc.get_traced_memory()}")
+
+print(f"propagation runtime: {t2-t1}")
+#algo.particles = algo.integrator.propagate(ctx=algo.context,particleArray=algo.particles)
+
+
+# weights = algo.resampler.compute_weights(real_beta[:,0],particleArray=algo.particles)
+# algo.resampler.resample(ctx=algo.context,particleArray=algo.particles,weights=weights)
 # for particle in algo.particles: 
 #     print(particle.observation)
-
-weights = algo.resampler.compute_weights(real_beta[:,0],particleArray=algo.particles)
-algo.resampler.resample(ctx=algo.context,particleArray=algo.particles,weights=weights)
-for particle in algo.particles: 
-    print(particle.observation)
 
 
 
