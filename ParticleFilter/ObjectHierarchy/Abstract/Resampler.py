@@ -17,7 +17,7 @@ class Resampler(ABC):
         self.likelihood = likelihood
 
     @abstractmethod
-    def compute_weights(self,observation:int,particleArray:List[Particle])->NDArray[float_]: #implementations of compute_weights call the Resamplers _likelihood function in the computation
+    def compute_weights(self,observation:NDArray,particleArray:List[Particle])->NDArray[float_]: #implementations of compute_weights call the Resamplers _likelihood function in the computation
         pass
 
     @abstractmethod

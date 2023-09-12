@@ -37,6 +37,7 @@ class Particle:
 @dataclass(frozen=True)
 class Context: 
     particle_count: int = 1000
+    beta_length: int = 1
     clock: Clock = field(default_factory=lambda: Clock())
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
     data_scale:int = 1 #optional param to indicate the scale of the data i.e. the number number of days between each data point

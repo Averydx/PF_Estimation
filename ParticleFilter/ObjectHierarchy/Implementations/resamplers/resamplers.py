@@ -113,7 +113,8 @@ class PoissonResample(Resampler):
     
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
-    
+
+'''resampler using the multivariate normal distribution for resampling, note-the standard deviation must be very large for high-dimensional probability spaces(for R^6 I set it to 10000000)'''
 class MultivariateNormalResample(Resampler):
 
     def __init__(self) -> None:

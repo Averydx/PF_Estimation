@@ -14,11 +14,9 @@ class ParamOnlyMultivariate(Perturb):
 
         A = np.linalg.cholesky(self.hyperparameters['cov'])
         for i,_ in enumerate(particleArray): 
-            perturbed = np.log([particleArray[i].param[name] for name in ctx.estimated_params])
+            perturbed = np.log(particleArray[i].param['beta'])
             perturbed = np.exp(multivariate_normal(perturbed,A))
-
-            for j,name in enumerate(ctx.estimated_params): 
-                particleArray[i].param[name] = perturbed[j]
+            particleArray[i].param['beta'] = perturbed
 
         
 
