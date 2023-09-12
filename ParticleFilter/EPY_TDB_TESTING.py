@@ -13,7 +13,7 @@ import pandas as pd
 import tracemalloc
 import matplotlib.pyplot as plt
 
-real_beta = pd.read_csv('./data_sets/epy_inc.csv')
+real_beta = pd.read_csv('C:/Users/avery/PF_Epymorph/PF_Estimation/data_sets/epy_inc.csv')
 real_beta = np.squeeze(real_beta.to_numpy()) 
 real_beta = np.delete(real_beta,0,1)
 
@@ -35,9 +35,10 @@ algo.initialize({"beta":-1,"gamma":0.25,"xi":1/90,"theta":0.1,"move_control": 0.
 
 
 
-observations = np.zeros((6,150))
+observations = np.zeros((6,300))
+beta = np.zeros(300)
 tick_index = 0
-for i in range(150):
+for i in range(300):
      algo.particles = algo.integrator.propagate(ctx=algo.context,particleArray=algo.particles,tick_index=tick_index)
      weights = algo.resampler.compute_weights(real_beta[:,i],particleArray=algo.particles)
      algo.particles = algo.resampler.resample(ctx=algo.context,particleArray=algo.particles,weights=weights)
@@ -45,20 +46,23 @@ for i in range(150):
 
      print(f"iteration: {i}")
      observations[:,i] = np.mean([particle.observation for particle in algo.particles],axis=0)
-     print(np.mean([particle.param['beta'] for particle in algo.particles],axis=0))
-     print(observations[:,i])
-     print(real_beta[:,i])
+     beta[i] = (np.mean([particle.param['beta'] for particle in algo.particles],axis=0))
+     # print(observations[:,i])
+     # print(real_beta[:,i])
      #print(f"{weights}")
 
 #df = pd.DataFrame(observations)
 #df.to_csv('./data_sets/custom_epy_obvs')
 
-t = np.arange(150)
+t = np.arange(300)
 
 for i in range(0,6):
      plt.plot(t,observations[i,:])
      plt.scatter(t,real_beta[i,:],s=0.1)
 
+plt.show()
+
+plt.plot(t,beta)
 plt.show()
 
 

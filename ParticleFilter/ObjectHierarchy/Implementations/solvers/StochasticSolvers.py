@@ -3,7 +3,7 @@ from ObjectHierarchy.utilities.Utils import Particle,Context
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from epymorph.data import geo_library,ipm_library,mm_library
 from epymorph.context import Compartments, SimDType
-from particle_simulation import ParticleSimulation
+from utilities.particle_simulation import ParticleSimulation
 from typing import List
 import numpy as np
 
