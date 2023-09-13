@@ -1,9 +1,9 @@
 '''Stochastic analog to the euler solver for Alex and Kayodes SIRH model'''
 from ObjectHierarchy.utilities.Utils import Particle,Context
+import ObjectHierarchy.utilities.particle_simulation
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from epymorph.data import geo_library,ipm_library,mm_library
 from epymorph.context import Compartments, SimDType
-from particle_simulation import ParticleSimulation
 from typing import List
 import numpy as np
 

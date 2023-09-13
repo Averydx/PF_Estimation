@@ -5,6 +5,9 @@ from numpy import random,int_,float_
 from typing import Dict,List,Tuple
 from functools import wraps
 from time import perf_counter
+from epymorph.geo import Geo
+from epymorph.ipm.ipm import Ipm, IpmBuilder
+from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
 
 '''Data class to pass to the algorithm at runtime, how much of the time series to forecast and the time series of observation data'''
 @dataclass(frozen=True)
@@ -33,19 +36,18 @@ class Particle:
     state: NDArray
     observation: NDArray
 
-'''Meta data about the algorithm'''
+'''Metadata about the algorithm'''
 @dataclass(frozen=True)
 class Context: 
+    geo:Geo #information about the population of interest
+    ipm_builder: IpmBuilder #Class that builds the ipm 
+    mvm_builder: MovementBuilder #Class that builds the movement model
     particle_count: int = 1000
-    beta_length: int = 1
     clock: Clock = field(default_factory=lambda: Clock())
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
-    data_scale:int = 1 #optional param to indicate the scale of the data i.e. the number number of days between each data point
     seed_size: float = 0.01 #estimate of initial percentage of infected out of the total population
-    population: int = 100000 #estimate of the total population 
-    state_size: int = 4 #number of state variables in the model 
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
-    additional_hyperparameters: Dict = field(default_factory=lambda: {}) #Additional catch-all for model hyperparameters (put the M outer loop values of IF2 here)
+    
 
 
 '''Decorator for timing function calls '''
@@ -55,8 +57,8 @@ def timing(f):
         ts = perf_counter()
         result = f(*args, **kw)
         te = perf_counter()
-        print('func:%r args:[%r, %r] took: %2.4f sec' % \
-          (f.__name__, args, kw, te-ts))
+        print('func:%r took: %2.4f sec' % \
+          (f.__name__, te-ts))
         return result
     return wrap
 
