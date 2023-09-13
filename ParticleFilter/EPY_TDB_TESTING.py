@@ -25,7 +25,7 @@ resample = MultivariateNormalResample()
 algo = Epymorph_IF2(integrator=solver,
                          perturb=perturb,
                          resampler=resample,
-                         context=Context(population=7000000,state_size=4,additional_hyperparameters={"m":1},particle_count=1000))
+                         context=Context(population=7000000,state_size=4,additional_hyperparameters={"m":1},particle_count=100))
 
 
 algo.initialize({"beta":-1,"gamma":0.25,"xi":1/90,"theta":0.1,"move_control": 0.9})
