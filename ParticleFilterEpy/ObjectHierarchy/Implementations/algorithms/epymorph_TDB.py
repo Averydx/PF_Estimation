@@ -1,12 +1,13 @@
 from typing import Dict
 from epymorph.data import geo_library, ipm_library, mm_library
 from epymorph.context import Compartments, SimDType
+from epymorph.util import check_ndarray
 from ObjectHierarchy.Abstract.Algorithm import Algorithm
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
-from ObjectHierarchy.utilities.Utils import Context,Particle, RunInfo,quantiles,timing
+from ObjectHierarchy.utilities.Utils import Context,Particle,quantiles,timing
 import matplotlib.pyplot as plt
 
 import numpy as np
@@ -19,9 +20,13 @@ class Epymorph_PF(Algorithm):
 
     def initialize(self, params: Dict) -> None:
 
+        '''Type and shape checking to prevent against invalid data'''
+        check_ndarray(value=self.ctx.observation_data[0,:],dtype=[np.int64,np.int32,np.int16],shape=(self.ctx.geo.nodes,))
+
+        '''call the super to perform checking for estimated parameters '''
         super().initialize(params=params)
 
-        for i in range(self.ctx.particle_count): 
+        for _ in range(self.ctx.particle_count): 
             for param in self.ctx.estimated_params:
                 params[param] = self.ctx.rng.uniform(0.,1.)
 
@@ -48,24 +53,20 @@ class Epymorph_PF(Algorithm):
 
             self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=observation))
 
-    def run()->Output:
-        pass
+    def run(self)->Output:
+        '''field initializations for Output'''
+        self.output = Output(observation_data=self.ctx.observation_data)
 
+        '''epymorph requires that we store the tick index'''
+        tick_index = 0
 
-
-    # @timing
-    # def run(self,info:RunInfo) ->Output:
-
-    #         average_beta = np.zeros(300)
-
-    #         '''field initializations for Output'''
-    #         self.output = Output(observation_data=info.observation_data)
-    #         self.output_flags = info.output_flags
-    #         tick_index = 0
-
-    #         while self.context.clock.time < int((info.observation_data[0,:].size)): 
+        '''main run loop'''
+        while self.ctx.clock.time < int((self.ctx.observation_data[:,0].size)): 
                 
-    #             self.particles = self.integrator.propagate(self.particles,self.context,tick_index)
+            self.particles = self.integrator.propagate(self.particles,self.ctx,tick_index)
+
+
+
     #             weights = self.resampler.compute_weights(info.observation_data[:,self.context.clock.time],self.particles)
     #             self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
     #             self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
@@ -78,6 +79,17 @@ class Epymorph_PF(Algorithm):
     #             self.context.clock.tick()
     #             print(f"iteration: {self.context.clock.time}")
 
+
+
+
+
+    # @timing
+    # def run(self,info:RunInfo) ->Output:
+
+    #         average_beta = np.zeros(300)
+
+  
+    
     #         self.clean_up()
 
     #         return self.output

@@ -1,20 +1,24 @@
 from dataclasses import dataclass,field
+import pandas as pd 
 import numpy as np
 from numpy.typing import NDArray
-from numpy import random,int_,float_
+from numpy import random
 from typing import Dict,List,Tuple
 from functools import wraps
 from time import perf_counter
 from epymorph.geo import Geo
 from epymorph.ipm.ipm import Ipm, IpmBuilder
 from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
+import os.path
 
-'''Data class to pass to the algorithm at runtime, how much of the time series to forecast and the time series of observation data'''
-@dataclass(frozen=True)
-class RunInfo: 
-    observation_data: NDArray[int_] #Array of observation data that will be passed to the Algorithm, dimension agnostic 
-    forecast_time:int # optional param to indicate the amount of time series to forecast 
-    output_flags: Dict #param to check if writing to file
+'''Wrapper for dataset parsing using pandas, wraps to_csv with protections'''
+def get_observations(filePath: str)->NDArray: 
+    if not os.path.isfile(filePath):
+        raise Exception("The file path specified was not found")
+    df = pd.read_csv(filePath)
+    
+    return df.to_numpy()
+
 
 
 '''Internal clock for keeping track of the time the algorithm is at in the observation data'''
@@ -39,6 +43,8 @@ class Particle:
 '''Metadata about the algorithm'''
 @dataclass(frozen=True)
 class Context: 
+
+    observation_data: NDArray # TxN NDArray of observation data  
     geo:Geo #information about the population of interest
     ipm_builder: IpmBuilder #Class that builds the ipm 
     mvm_builder: MovementBuilder #Class that builds the movement model
@@ -47,9 +53,8 @@ class Context:
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
     seed_size: float = 0.01 #estimate of initial percentage of infected out of the total population
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
+
     
-
-
 '''Decorator for timing function calls '''
 def timing(f):
     @wraps(f)

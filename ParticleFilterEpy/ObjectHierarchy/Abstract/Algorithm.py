@@ -1,4 +1,4 @@
-from abc import ABC,abstractmethod,abstractproperty
+from abc import ABC,abstractmethod
 from numpy.typing import NDArray
 from numpy import random,array,concatenate
 from typing import List,Dict
@@ -6,11 +6,11 @@ from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
-from ObjectHierarchy.utilities.Utils import RunInfo,Particle,Context,Clock
+from ObjectHierarchy.utilities.Utils import Particle,Context,Clock
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-from copy import deepcopy
+
 
 class Algorithm(ABC): 
 
@@ -18,8 +18,7 @@ class Algorithm(ABC):
     perturb: Perturb
     resampler: Resampler
     particles: List[Particle]
-    context: Context
-    output_flags: Dict
+    ctx: Context
     output: Output
 
     def __init__(self,integrator:Integrator,perturb:Perturb,resampler:Resampler,ctx:Context)->None:
@@ -29,7 +28,6 @@ class Algorithm(ABC):
         self.particles = []
         self.ctx = ctx
         self.output = Output(np.array([]))
-        self.output_flags = {}
 
 
     '''Abstract Methods''' 
@@ -41,7 +39,7 @@ class Algorithm(ABC):
                 self.ctx.estimated_params.append(key)
 
     @abstractmethod
-    def run(self,info:RunInfo) ->Output:
+    def run(self) ->Output:
         pass
         
     '''Callables'''
