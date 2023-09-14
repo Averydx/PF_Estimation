@@ -24,34 +24,6 @@ def likelihood_normal(observation,particle_observations:NDArray[np.int_],var)->N
 def joint_likelihood_normal(observation:NDArray[np.int_],particle_observations:NDArray[np.int_],cov:int): 
     return multivariate_normal.pdf(observation,mean = particle_observations,cov = cov)
 
-
-'''Resampler using the normal probability density function to compute the weights'''
-class NormResample(Resampler):
-
-    var: float
-
-    def __init__(self,var:float) -> None:
-        super().__init__(likelihood_normal)
-        self.var = var
-    def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
-
-        weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray],self.var))
-
-        for j in range(len(particleArray)):  
-            if(weights[j] == 0):
-                weights[j] = 10**-300 
-            elif(np.isnan(weights[j])):
-                weights[j] = 10**-300
-            elif(np.isinf(weights[j])):
-                weights[j] = 10**-300
-
-        weights = weights/np.sum(weights)
-
-        return np.squeeze(weights)
-    
-    def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
-        return super().resample(weights, ctx,particleArray)
-    
 '''Resampler using the negative binomial probability mass function to compute the weights'''
 class NBResample(Resampler):
 
@@ -60,6 +32,7 @@ class NBResample(Resampler):
     def __init__(self,var) -> None:
         super().__init__(likelihood_NB)
         self.var = var
+        self.Flags = {"all_size_valid":False}
 
     def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
 
@@ -89,6 +62,7 @@ class PoissonResample(Resampler):
 
     def __init__(self) -> None:
         super().__init__(likelihood_poisson)
+        self.Flags = {"all_size_valid":False}
 
 
 #TODO Debug invalid weights in divide 
@@ -117,18 +91,20 @@ class PoissonResample(Resampler):
 '''resampler using the multivariate normal distribution for resampling, note-the standard deviation must be very large for high-dimensional probability spaces(for R^6 I set it to 10000000)'''
 class MultivariateNormalResample(Resampler):
 
-    def __init__(self) -> None:
-        super().__init__(likelihood_poisson)
+    cov: int
+
+    def __init__(self,cov) -> None:
+        super().__init__(joint_likelihood_normal)
+        self.Flags = {"all_size_valid":True}
+        self.cov = cov
 
 
 #TODO Debug invalid weights in divide 
     def compute_weights(self, observation: NDArray, particleArray:List[Particle]) -> NDArray[np.float_]:
         p_obvs = np.array([particle.observation for particle in particleArray])
-        #cov = np.cov(p_obvs.T)
-        cov =10000000
         weights = np.zeros(len(p_obvs))
         for i,particle in enumerate(particleArray):
-            weights[i] = multivariate_normal.pdf(observation,mean =particle.observation,cov=cov,allow_singular=True)
+            weights[i] = joint_likelihood_normal(observation=observation,particle_observations=particle.observation,cov=self.cov)
 
         for j in range(len(particleArray)):  
             if(weights[j] == 0):

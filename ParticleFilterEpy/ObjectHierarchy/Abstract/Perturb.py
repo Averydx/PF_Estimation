@@ -4,7 +4,7 @@ from ObjectHierarchy.utilities.Utils import Particle,Context
 
 class Perturb(ABC): 
     hyperparameters: Dict
-
+    Flags:Dict[str,int]
     def __init__ (self,hyper_params:Dict)-> None: 
         self.hyperparameters = hyper_params
 

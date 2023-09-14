@@ -44,13 +44,20 @@ class Algorithm(ABC):
         
     '''Callables'''
 
+    '''Prints the particle swarm in a human readable format'''
     def print_particles(self): 
         for i,particle in enumerate(self.particles): 
             print(f"{i}: {particle}")
 
-    def clean_up(self): 
-        if self.output_flags['write'] is True: 
-            pd.DataFrame(self.output.average_beta).to_csv('./output/average_beta.csv')
+    '''Verifies the field all compatible with the underlying model'''
+    def verify_fields(self)->None:
+        '''Perturber and resampler verification'''
+        if(self.ctx.geo.nodes > 1 and self.resampler.Flags['all_size_valid'] is False):
+            raise Exception("Resampler is incompatible with geos of dim > 1")
+        
+        if(self.ctx.geo.nodes > 1 and self.perturb.Flags['all_size_valid'] is False):
+            raise Exception("Perturber is incompatible with geos of dim > 1")
+
 
 
 

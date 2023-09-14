@@ -58,9 +58,8 @@ for pop_idx in range(out.ctx.nodes):
 incidence = np.array(incidence)
 
 df = pd.DataFrame(incidence)
-df.to_csv('C:/Users/avery/PF_Epymorph/PF_Estimation/data_sets/epy_inc.csv')
+df.to_csv('./data_sets/epy_inc.csv')
 
-t = np.arange(150)
 plot_event(out,0)
 
 

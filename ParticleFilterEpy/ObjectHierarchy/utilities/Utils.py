@@ -19,7 +19,14 @@ def get_observations(filePath: str)->NDArray:
     
     return df.to_numpy()
 
+'''pass in the cholesky decomp of the cov matrix, important because the cholesky decomp is only calculated once --NOT CALCULATED INSIDE FUNCTION--'''
+def multivariate_normal(mean,A):
 
+    x = np.random.standard_normal(mean.shape)
+    x = np.dot(x, A)
+    x += mean
+    x.shape = tuple(mean.shape)
+    return x
 
 '''Internal clock for keeping track of the time the algorithm is at in the observation data'''
 class Clock: 
@@ -51,7 +58,7 @@ class Context:
     particle_count: int = 1000
     clock: Clock = field(default_factory=lambda: Clock())
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
-    seed_size: float = 0.01 #estimate of initial percentage of infected out of the total population
+    seed_size: float = 0.01 #number of initial infected
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
 
     

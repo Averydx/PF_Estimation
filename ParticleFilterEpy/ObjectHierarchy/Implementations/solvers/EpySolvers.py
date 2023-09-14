@@ -1,4 +1,4 @@
-'''Stochastic analog to the euler solver for Alex and Kayodes SIRH model'''
+
 from ObjectHierarchy.utilities.Utils import Particle,Context
 from ObjectHierarchy.utilities.particle_simulation import ParticleSimulation
 from ObjectHierarchy.Abstract.Integrator import Integrator
@@ -23,7 +23,7 @@ class EpymorphSolver(Integrator):
             )
 
             incidence = sim.step() + sim.step()
-
+            
             particleArray[j].observation = incidence[:,0]
             particleArray[j].state = np.array(sim.get_compartments())
 

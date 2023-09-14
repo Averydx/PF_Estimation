@@ -1,22 +1,27 @@
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from typing import List,Dict
 import numpy as np
-from utilities.utility import multivariate_normal
-from ObjectHierarchy.utilities.Utils import Context,Particle
+#from utilities.utility import multivariate_normal
+from ObjectHierarchy.utilities.Utils import Context,Particle,multivariate_normal
+from epymorph.util import check_ndarray
 
 
 '''Multivariate geometric perturbations to the parameters only, not the state'''
 class ParamOnlyMultivariate(Perturb): 
     def __init__(self,params:Dict) -> None:
         super().__init__(params)
+        self.Flags = {"all_size_valid":True}
+        if(not 'cov' in self.hyperparameters):
+           raise Exception("covariance matrix is not defined -please define the covariance as an scalar in this object's constructor, it will be manually broadcast to a diagional array")
 
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
-
-        A = np.linalg.cholesky(self.hyperparameters['cov'])
+        cov = np.diag([self.hyperparameters['cov'] for _ in range(len(ctx.estimated_params))])
+        A = np.linalg.cholesky(cov)
         for i,_ in enumerate(particleArray): 
-            perturbed = np.log(particleArray[i].param['beta'])
-            perturbed = np.exp(multivariate_normal(perturbed,A))
-            particleArray[i].param['beta'] = perturbed
+            for estimated_param in ctx.estimated_params:
+                perturbed = np.log(particleArray[i].param[estimated_param])
+                perturbed = np.exp(multivariate_normal(perturbed,A))
+                particleArray[i].param[estimated_param] = perturbed
 
         
 
@@ -26,6 +31,7 @@ class ParamOnlyMultivariate(Perturb):
 class MultivariatePerturbations(Perturb): 
     def __init__(self,params:Dict) -> None:
         super().__init__(params)
+        self.Flags = {"all_size_valid":False}
 
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
         C = np.diag([(self.hyperparameters['sigma1']/ctx.population) ** 2,
@@ -60,6 +66,7 @@ class DiscretePerturbations(Perturb):
 
     def __init__(self, params: Dict) -> None:
         super().__init__(params)
+        self.Flags = {"all_size_valid":False}
 
     def randomly_perturb(self, ctx: Context, particleArray: List[Particle]) -> List[Particle]:
         match np.shape(self.hyperparameters['cov']): 

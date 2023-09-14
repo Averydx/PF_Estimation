@@ -1,15 +1,17 @@
 from typing import Dict
 from epymorph.data import geo_library, ipm_library, mm_library
 from epymorph.context import Compartments, SimDType
-from epymorph.util import check_ndarray
+from epymorph.util import check_ndarray,NumpyTypeError
 from ObjectHierarchy.Abstract.Algorithm import Algorithm
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
 from ObjectHierarchy.utilities.Utils import Context,Particle,quantiles,timing
+from epymorph.ipm.ipm import Ipm, IpmBuilder
+from epymorph.movement.basic import BasicEngine
+from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
 import matplotlib.pyplot as plt
-
 import numpy as np
 
 
@@ -20,11 +22,19 @@ class Epymorph_PF(Algorithm):
 
     def initialize(self, params: Dict) -> None:
 
-        '''Type and shape checking to prevent against invalid data'''
-        check_ndarray(value=self.ctx.observation_data[0,:],dtype=[np.int64,np.int32,np.int16],shape=(self.ctx.geo.nodes,))
-
-        '''call the super to perform checking for estimated parameters '''
+        '''Note, it is required to invoke the super initializer to get the list of estimated params'''
         super().initialize(params=params)
+
+
+        '''Type and shape checking to prevent against invalid data'''
+        try:
+            check_ndarray(value=self.ctx.observation_data[0,:],dtype=[np.int64,np.int32,np.int16],shape=(self.ctx.geo.nodes,))
+        except NumpyTypeError:
+            raise Exception("Observation data did not match the specified shape, check data dimensionality, must be (TxN)")
+    
+
+        '''Verify the resampler and perturber are functional for the epymorph model at the requested scale'''
+        self.verify_fields()
 
         for _ in range(self.ctx.particle_count): 
             for param in self.ctx.estimated_params:
@@ -53,31 +63,29 @@ class Epymorph_PF(Algorithm):
 
             self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=observation))
 
+    @timing
     def run(self)->Output:
         '''field initializations for Output'''
         self.output = Output(observation_data=self.ctx.observation_data)
 
-        '''epymorph requires that we store the tick index'''
-        tick_index = 0
+        beta=[]
 
         '''main run loop'''
         while self.ctx.clock.time < int((self.ctx.observation_data[:,0].size)): 
-                
-            self.particles = self.integrator.propagate(self.particles,self.ctx,tick_index)
+            self.particles = self.integrator.propagate(self.particles,self.ctx)
+            weights = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
+            self.particles = self.resampler.resample(weights=weights,ctx=self.ctx,particleArray=self.particles)
+            self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
 
+            '''output updates, not part of the main algorithm'''
+            beta.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)],axis=0))
+            self.ctx.clock.tick()
+            print(f"iteration: {self.ctx.clock.time}")  
 
+        plt.plot(beta)
+        plt.show()
 
-    #             weights = self.resampler.compute_weights(info.observation_data[:,self.context.clock.time],self.particles)
-    #             self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
-    #             self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
-
-    #             # '''output updates, not part of the main algorithm'''
-    #             #self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
-    #             print(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)],axis=0))
-    #             # self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
-
-    #             self.context.clock.tick()
-    #             print(f"iteration: {self.context.clock.time}")
+        return self.output    
 
 
 

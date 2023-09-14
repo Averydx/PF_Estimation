@@ -3,13 +3,14 @@ from numpy.typing import NDArray
 import numpy as np
 from numpy import float_,int_
 from types import FunctionType,BuiltinFunctionType
-from typing import List
+from typing import List,Dict
 from ObjectHierarchy.utilities.Utils import Context,Particle
 from copy import deepcopy
 
 class Resampler(ABC): 
 
     likelihood:FunctionType | BuiltinFunctionType #A function that returns a likelihood given a real observation and a simulated observation corresponding to a particle 
+    Flags: Dict[str,int]
 
     def __init__(self,likelihood) -> None:
         if not isinstance(likelihood,(FunctionType,BuiltinFunctionType)): 
