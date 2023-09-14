@@ -16,7 +16,7 @@ np.set_printoptions(suppress=True)
 # euler = Euler()
 solver = EulerSolver()
 perturb = MultivariatePerturbations(params={"sigma1":0.1,"sigma2":0.1})
-resample = NBResample(10)
+resample = PoissonResample()
 
 algo = TimeDependentAlgo(integrator=solver,
                          perturb=perturb,
