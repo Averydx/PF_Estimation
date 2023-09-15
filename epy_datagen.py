@@ -35,6 +35,7 @@ sim = Simulation(
     mvm_builder=mm_library['pei']()
 )
 
+print(ipm_library['sirs']().compartment_tags())
 out = sim.run(
     param={
         'beta':beta_cos,
