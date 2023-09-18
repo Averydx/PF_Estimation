@@ -44,6 +44,7 @@ class Context:
     seed_size: float = 0.01 #estimate of initial percentage of infected out of the total population
     population: int = 100000 #estimate of the total population 
     state_size: int = 4 #number of state variables in the model 
+    estimation_scale : int = 1
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
     additional_hyperparameters: Dict = field(default_factory=lambda: {}) #Additional catch-all for model hyperparameters (put the M outer loop values of IF2 here)
 

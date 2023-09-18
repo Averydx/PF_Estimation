@@ -7,6 +7,7 @@ from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
 from ObjectHierarchy.utilities.Utils import Particle,Context,Clock
+from epymorph.util import check_ndarray,NumpyTypeError
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -46,12 +47,29 @@ class Algorithm(ABC):
     '''Abstract Methods''' 
     @abstractmethod
     def initialize(self,params:Dict)->None:
-        '''Calling this function will setup the list of estimated parameters in the Particle Filtering, 
+
+        
+        '''Calling this function will setup parameters in the Particle Filtering, 
         in user implementations of the initialization method you can call this to perform setup'''
 
+        '''Type and shape checking to prevent against invalid data'''
+        try:
+            check_ndarray(value=self.ctx.observation_data[0,:],dtype=[np.int64,np.int32,np.int16],shape=(self.ctx.geo.nodes,))
+        except NumpyTypeError:
+            raise Exception("Observation data did not match the specified shape, check data dimensionality, must be (TxN)")
+    
+        '''Verify the resampler and perturber are functional for the epymorph model at the requested scale'''
+        self.verify_fields()
+
+
         for _,(key,val) in enumerate(params.items()): 
-            if val == -1: 
+            if np.any(val[val <0]): 
                 self.ctx.estimated_params.append(key)
+
+
+
+
+
 
 
     @abstractmethod
@@ -77,9 +95,8 @@ class Algorithm(ABC):
         '''Perturber and resampler verification'''
         if(self.ctx.geo.nodes > 1 and self.resampler.Flags['all_size_valid'] is False):
             raise Exception("Resampler is incompatible with geos of dim > 1")
-        
-        if(self.ctx.geo.nodes > 1 and self.perturb.Flags['all_size_valid'] is False):
-            raise Exception("Perturber is incompatible with geos of dim > 1")
+
+
 
 
 

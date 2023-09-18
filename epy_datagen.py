@@ -9,6 +9,7 @@ from epymorph.initializer import single_location
 from epymorph.simulation import Simulation
 from epymorph.run import plot_event,plot_pop
 from epymorph.util import stridesum
+from epymorph.geo import CentroidDType, Geo
 import matplotlib.pyplot as plt
 import pandas as pd
 
@@ -17,6 +18,21 @@ import pandas as pd
 
 # The 'pei' model family (IPM/MM/GEO) implement an SIRS model in 6 US states.
 # (Remember: it is possible to mix-and-match the models!)
+
+
+label = ['AZ','CA']
+geo = Geo(
+        nodes=len(label),
+        labels=label,
+        data={
+            'label': np.array(label, dtype=str),
+            'geoid': np.array(['04','05'], dtype=str),
+            'centroid': np.array([(-111.856111, 34.566667)], dtype=CentroidDType),
+            'population': np.array([100_000,100_000], dtype=np.int64),
+            'commuters': np.array([[0,1000],
+                                   [10000,0]], dtype=np.int64)
+        }
+    )
 
 def beta(t):
         
@@ -27,18 +43,21 @@ def beta(t):
     #return 0.1
 
 beta_cos = np.array([beta(t) for t in range(300)])
-plt.plot(beta_cos)
+
+betas = np.zeros((300,2))
+betas[:,0] = beta_cos
+betas[:,1] = np.array([0.4 for _ in range(300)])
 
 sim = Simulation(
-    geo=geo_library['pei'](),
+    geo=geo,
     ipm_builder=ipm_library['sirs'](),
     mvm_builder=mm_library['pei']()
 )
 
-print(ipm_library['sirs']().compartment_tags())
+
 out = sim.run(
     param={
-        'beta':beta_cos,
+        'beta': betas,
         'gamma':0.25,
         'xi':1/90,
         'theta': 0.1,
