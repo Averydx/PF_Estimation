@@ -47,7 +47,7 @@ If specified the algorithm will stop after len(observation_data)/2 and propagate
 
 Example of execution after entering venv with simulated data:
 
-python main.py --iterations 500 --population 100000 --particles 50000 --simulate_data true --initial_seed 0.1
+python -m ParticleFilter --iterations 500 --population 100000 --particles 50000 --simulate_data true --initial_seed 0.1
 
 
 
@@ -55,7 +55,7 @@ python main.py --iterations 500 --population 100000 --particles 50000 --simulate
 
 Example of execution after entering venv with real data: 
 
-python main.py --iterations 223 --population 100000 --particles 50000 --initial_seed 0.1 --file ./data_sets/FLU_HOSPITALIZATIONS.csv
+python -m ParticleFilter--iterations 223 --population 100000 --particles 50000 --initial_seed 0.1 --file ./data_sets/FLU_HOSPITALIZATIONS.csv
 
 
 
