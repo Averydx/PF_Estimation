@@ -5,9 +5,7 @@ from numpy import int_
 from ObjectHierarchy.utilities.Utils import Particle,Context
 
 class Integrator(ABC): 
-
-    '''Epymorph data attributes for propagation'''
-    '''Note that if the '''
+    '''Base class for one step integration functionality'''
 
 
     '''Propagates the state forward one step and returns an array of states and observations across the the integration period'''

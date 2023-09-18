@@ -36,6 +36,7 @@ class Epymorph_PF(Algorithm):
         '''Verify the resampler and perturber are functional for the epymorph model at the requested scale'''
         self.verify_fields()
 
+        '''Initializes the estimated parameters to via a uniform prior '''
         for _ in range(self.ctx.particle_count): 
             for param in self.ctx.estimated_params:
                 params[param] = self.ctx.rng.uniform(0.,1.)
@@ -45,6 +46,7 @@ class Epymorph_PF(Algorithm):
             initial_infected = self.ctx.rng.integers(0,np.round(self.ctx.seed_size*pops[0]))
             state = []
 
+            '''Constructs the state array, if the index is 0 place the infected seed there, else append the population in S and every other compartment to zeroes'''
             for index,pop in enumerate(pops): 
                 if(index == 0):
                     substate = [pop-initial_infected,initial_infected]
@@ -58,9 +60,12 @@ class Epymorph_PF(Algorithm):
 
                 state.append(substate)
 
-            state = np.array(state)      
+            state = np.array(state)   
+
+            '''Initialize observations as an array of zeroes'''   
             observation = np.array([0 for _ in range(self.ctx.geo.nodes)])
 
+            '''Create the Particle with the computed fields'''
             self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=observation))
 
     @timing

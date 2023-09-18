@@ -5,6 +5,8 @@ from dataclasses import dataclass,field
 
 @dataclass
 class Output: 
+    '''This dataclass encapsulates all the output of the algorithm, it is instantiated with only the observation data over which the algorithm runs, all other fields are instantiated 
+to numpy arrays of len(observation_data), all zeroes'''
     observation_data: NDArray
     observation_qtls: NDArray = field(init=False)
     beta_qtls: NDArray = field(init=False)

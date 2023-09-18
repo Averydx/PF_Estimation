@@ -18,11 +18,15 @@ from epymorph.simulation import Simulation
 
 
 class ParticleSimulation: 
+    '''ParticleSimulation wraps the basic functionality of the epymorph solver, this API interfaces with epymorph to run one day of simulation and extract prevalence and 
+    incidence data for the next time step'''
+
+    '''Read the epymorph documentation for more information on these fields, they are the basic fields required for running an epymorph simulation'''
     ctx:SimContext
     ipm: Ipm
     mvm: Movement
     mve: MovementEngine
-    tick_index: int
+    tick_index: int 
 
     def __init__(self,geo:Geo,ipm_builder:IpmBuilder,mvm_builder:MovementBuilder,tick_index:int,param: dict[str,Any],compartments:Compartments):
         self.ctx = SimContext(nodes = geo.nodes,
@@ -50,7 +54,7 @@ class ParticleSimulation:
     '''
     def step(self)->Events: 
 
-        _,N,_,E = self.ctx.TNCE
+        _,N,_,E = self.ctx.TNCE 
         events_out = np.empty((N,E),dtype=SimDType)
 
         tick = self.ctx.clock.ticks[self.tick_index]

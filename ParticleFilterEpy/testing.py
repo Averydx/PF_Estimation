@@ -31,6 +31,7 @@ algo = Epymorph_PF(integrator=solver,
 
 
 algo.initialize({"beta":-1,"gamma":0.25,"xi":1/90,"theta":0.1,"move_control": 0.9})
-out = algo.run()
+algo.particles = algo.integrator.propagate(algo.particles,algo.ctx)
+#out = algo.run()
 # plot(out,1)
 

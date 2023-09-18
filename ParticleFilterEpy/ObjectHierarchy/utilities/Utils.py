@@ -55,9 +55,9 @@ class Context:
     geo:Geo #information about the population of interest
     ipm_builder: IpmBuilder #Class that builds the ipm 
     mvm_builder: MovementBuilder #Class that builds the movement model
-    particle_count: int = 1000
-    clock: Clock = field(default_factory=lambda: Clock())
-    rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
+    particle_count: int = 1000 #Number of particles to run the algorithm against
+    clock: Clock = field(default_factory=lambda: Clock()) #clock controls run iteration, is checked in other methods and is therefore mandatory for algorithm
+    rng:random.Generator = field(default_factory=lambda: np.random.default_rng()) #numpy random numpy generator, defaults to PCG64, see numpy random for more PRNGS
     seed_size: float = 0.01 #number of initial infected
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
 
