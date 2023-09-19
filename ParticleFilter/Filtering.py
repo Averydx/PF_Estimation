@@ -8,7 +8,9 @@ import warnings
 warnings.filterwarnings("ignore", category=RuntimeWarning) 
 from ParticleFilter.utilities.utility import *
 
+'''The output class encapsulates the output of the simulation, returned from estimate_params'''
 class Output:
+    '''Class attribute definitions'''
     average_betas: NDArray[np.float_]
     beta_qtls: NDArray
     average_infected: NDArray[np.float_]
@@ -39,11 +41,14 @@ class Output:
     def average_dI(self,sim_obvs:NDArray[np.float_],t)->None: 
         self.sim_obvs[t] = np.mean(sim_obvs) 
 
+    '''Quantiles helper function'''
     def quantiles(self,sim_obvs:NDArray[np.float_],t)->None: 
         qtlMark = 1.00*np.array([0.010, 0.025, 0.050, 0.100, 0.150, 0.200, 0.250, 0.300, 0.350, 0.400, 0.450, 0.500, 0.550, 0.600, 0.650, 0.700, 0.750, 0.800, 0.850, 0.900, 0.950, 0.975, 0.990])
         return np.quantile(sim_obvs, qtlMark)
 
 
+
+'''The main class for running the Particle Filter'''
 class ParticleFilter: 
 
     out: Output

@@ -26,8 +26,24 @@ def beta(t):
     return 0.3+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
     #return 0.1
 
+def beta_2(t):
+        
+    betaMax1=0.1
+    theta=0
+
+    return 0.5+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
+    #return 0.1
+
+beta_cos_2 = np.array([beta_2(t) for t in range(300)])
 beta_cos = np.array([beta(t) for t in range(300)])
 plt.plot(beta_cos)
+plt.plot(beta_cos_2)
+plt.show()
+
+betas = np.zeros((300,2))
+
+betas[:,0] = beta_cos
+betas[:,1] = beta_cos_2
 
 sim = Simulation(
     geo=geo_library['pei'](),
@@ -59,7 +75,7 @@ for pop_idx in range(out.ctx.nodes):
 incidence = np.array(incidence)
 
 df = pd.DataFrame(incidence)
-df.to_csv('./data_sets/epy_inc.csv')
+df.to_csv('/Users/averydrennan/ParticleFilter/PF_Estimation/data_sets/epy_inc.csv')
 
 plot_event(out,0)
 

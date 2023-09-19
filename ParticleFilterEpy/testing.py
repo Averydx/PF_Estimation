@@ -24,7 +24,7 @@ algo = Epymorph_PF(integrator=solver,
                          ctx=Context(observation_data=data,
                                      particle_count=100,
                                      seed_size=0.01,
-                                     geo=geo_library['pei'](),
+                                     geo=geo_library[''](),
                                      ipm_builder=ipm_library['sirs'](),
                                      mvm_builder=mm_library['pei'](),
                                      rng = np.random.default_rng(1)))
