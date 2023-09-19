@@ -15,7 +15,7 @@ class ParamOnlyMultivariate(Perturb):
            raise Exception("covariance matrix is not defined -please define the covariance as an scalar in this object's constructor, it will be manually broadcast to a diagional array")
 
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
-        cov = np.diag([self.hyperparameters['cov'] for _ in range(len(ctx.estimated_params))])
+        cov = np.diag([self.hyperparameters['cov'] for _ in range(ctx.geo.nodes)])
         A = np.linalg.cholesky(cov)
         for i,_ in enumerate(particleArray): 
             for estimated_param in ctx.estimated_params:

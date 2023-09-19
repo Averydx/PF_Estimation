@@ -10,6 +10,7 @@ from epymorph.simulation import Simulation
 from epymorph.run import plot_event,plot_pop
 from epymorph.util import stridesum
 import matplotlib.pyplot as plt
+from ParticleFilterEpy.ObjectHierarchy.geo.dual_pop import load
 import pandas as pd
 
 # Note: the 'library' dictionaries contain functions which load the named component,
@@ -17,6 +18,8 @@ import pandas as pd
 
 # The 'pei' model family (IPM/MM/GEO) implement an SIRS model in 6 US states.
 # (Remember: it is possible to mix-and-match the models!)
+
+
 
 def beta(t):
         
@@ -46,15 +49,14 @@ betas[:,0] = beta_cos
 betas[:,1] = beta_cos_2
 
 sim = Simulation(
-    geo=geo_library['pei'](),
+    geo=load(),
     ipm_builder=ipm_library['sirs'](),
     mvm_builder=mm_library['pei']()
 )
 
-print(ipm_library['sirs']().compartment_tags())
 out = sim.run(
     param={
-        'beta':beta_cos,
+        'beta':betas,
         'gamma':0.25,
         'xi':1/90,
         'theta': 0.1,

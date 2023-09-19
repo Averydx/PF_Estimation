@@ -7,6 +7,7 @@ from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
 from ObjectHierarchy.utilities.Utils import Particle,Context,Clock
+from epymorph.util import check_ndarray,NumpyTypeError
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -34,14 +35,63 @@ class Algorithm(ABC):
     @abstractmethod
     def initialize(self,params:Dict)->None:
 
+        '''Builds the list of estimated parameters'''
         for _,(key,val) in enumerate(params.items()): 
-            if val == -1: 
+            if np.all([item == -1 for item in val]): 
                 self.ctx.estimated_params.append(key)
+
+        '''Type and shape checking to prevent against invalid data'''
+        try:
+            check_ndarray(value=self.ctx.observation_data[0,:],dtype=[np.int64,np.int32,np.int16],shape=(self.ctx.geo.nodes,))
+        except NumpyTypeError:
+            raise Exception("Observation data did not match the specified shape, check data dimensionality, must be (TxN)")
+        
+        '''Verify the resampler and perturber are functional for the epymorph model at the requested scale'''
+        self.verify_fields()
+
+        '''Initializes the default values of the estimated params, based on the length passed in at object instantiation'''
+        for _ in range(self.ctx.particle_count): 
+            for param in self.ctx.estimated_params:
+                params[param] = [self.ctx.rng.uniform(0.,1.) for _ in range(len(params[param]))]
+                if (len(params[param]) != np.shape(self.ctx.observation_data[1])):
+                    raise Exception(f"estimated parameter:{param} shape and data shape mismatch!")
+
+            '''Draw a random int to represent the initial infected'''
+            pops = self.ctx.geo.data['population'] 
+            initial_infected = self.ctx.rng.integers(0,np.round(self.ctx.seed_size*pops[0]))
+            state = []
+
+            '''Create initial compartment values for both the population with the initial infection and the ones without dynamically'''
+            for index,pop in enumerate(pops): 
+                if(index == 0):
+                    substate = [pop-initial_infected,initial_infected]
+                    for _ in range(self.ctx.ipm_builder.compartments-2):
+                        substate.append(0)
+
+                else: 
+                    substate = [pop,0]
+                    for _ in range(self.ctx.ipm_builder.compartments-2):
+                        substate.append(0)
+
+                state.append(substate)
+
+            state = np.array(state)      
+            observation = np.array([0 for _ in range(self.ctx.geo.nodes)])
+
+            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=observation))
+
+    
+
+
+        
 
     @abstractmethod
     def run(self) ->Output:
         pass
         
+
+
+
     '''Callables'''
 
     '''Prints the particle swarm in a human readable format'''

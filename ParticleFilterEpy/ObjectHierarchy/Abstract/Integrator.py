@@ -6,10 +6,6 @@ from ObjectHierarchy.utilities.Utils import Particle,Context
 
 class Integrator(ABC): 
 
-    '''Epymorph data attributes for propagation'''
-    '''Note that if the '''
-
-
     '''Propagates the state forward one step and returns an array of states and observations across the the integration period'''
     @abstractmethod
     def propagate(self,particleArray:List[Particle],ctx:Context)->List[Particle]: 
