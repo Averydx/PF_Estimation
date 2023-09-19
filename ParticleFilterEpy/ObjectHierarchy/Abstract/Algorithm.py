@@ -53,7 +53,9 @@ class Algorithm(ABC):
         for _ in range(self.ctx.particle_count): 
             for param in self.ctx.estimated_params:
                 params[param] = [self.ctx.rng.uniform(0.,1.) for _ in range(len(params[param]))]
-                if (len(params[param]) != np.shape(self.ctx.observation_data[1])):
+                if (len(params[param]) != len(self.ctx.observation_data[0,:])):
+                    if(len(params[param])== 1):
+                        break
                     raise Exception(f"estimated parameter:{param} shape and data shape mismatch!")
 
             '''Draw a random int to represent the initial infected'''
