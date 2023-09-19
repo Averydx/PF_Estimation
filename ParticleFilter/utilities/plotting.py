@@ -12,7 +12,6 @@ def plot(out:Output,graph:int):
             ax1.set_title("Confidence Intervals")
             ax2.set_title("Average Beta over time")
             colors = cm.plasma(np.linspace(0, 1, 12))
-            ax1.set_ylim(0, 300)
             ax1.plot(t, out.observations[:out.time], color="blue", zorder=12)
             for i in range(11):
                 ax1.fill_between(t, out.obs_qtls[:, i], out.obs_qtls[:, 22 - i], facecolor=colors[11 - i], zorder=i)

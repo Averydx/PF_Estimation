@@ -49,10 +49,13 @@ class IF2(Algorithm):
                 self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
 
                 '''output updates, not part of the main algorithm'''
-                if(m == self.context.additional_hyperparameters['m'] -1): 
+                if(m == self.context.additional_hyperparameters['m'] -2): 
                     self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
                     self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
                     self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
+
+
+
 
                 #print(f"variance of beta: {variance(np.array([particle.param['beta'] for particle in self.particles]))}")
                 self.context.clock.tick()
@@ -61,7 +64,7 @@ class IF2(Algorithm):
             print(f"Iteration:{m} beta: {np.mean([particle.param['beta'] for particle in self.particles])}")
 
         self.clean_up()
-        return Output(np.array([]))
+        return self.output
 
 
 

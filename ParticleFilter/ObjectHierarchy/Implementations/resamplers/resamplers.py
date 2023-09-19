@@ -93,9 +93,7 @@ class PoissonResample(Resampler):
 
 #TODO Debug invalid weights in divide 
     def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
-
         weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray]))
-
 
         for j in range(len(particleArray)):  
             if(weights[j] == 0):

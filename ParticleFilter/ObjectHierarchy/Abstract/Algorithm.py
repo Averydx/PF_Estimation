@@ -28,7 +28,7 @@ class Algorithm(ABC):
         self.resampler = resampler
         self.particles = []
         self.context = context
-        self.output = Output(np.array([]))
+        self.output = None
         self.output_flags = {}
 
 
