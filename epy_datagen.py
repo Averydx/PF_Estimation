@@ -10,7 +10,7 @@ from epymorph.simulation import Simulation
 from epymorph.run import plot_event,plot_pop
 from epymorph.util import stridesum
 import matplotlib.pyplot as plt
-from ParticleFilterEpy.ObjectHierarchy.geo.dual_pop import load
+from ParticleFilterEpy.ObjectHierarchy.geo.triple_pop import load
 import pandas as pd
 
 # Note: the 'library' dictionaries contain functions which load the named component,
@@ -37,16 +37,27 @@ def beta_2(t):
     return 0.5+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
     #return 0.1
 
+def beta_3(t):
+        
+    betaMax1=0.1
+    theta=0
+
+    return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
+    #return 0.1
+
+beta_cos_3 = np.array([beta_3(t) for t in range(300)])
 beta_cos_2 = np.array([beta_2(t) for t in range(300)])
 beta_cos = np.array([beta(t) for t in range(300)])
 plt.plot(beta_cos)
 plt.plot(beta_cos_2)
+plt.plot(beta_cos_3)
 plt.show()
 
-betas = np.zeros((300,2))
+betas = np.zeros((300,3))
 
 betas[:,0] = beta_cos
 betas[:,1] = beta_cos_2
+betas[:,2] = beta_cos_3
 
 sim = Simulation(
     geo=load(),
@@ -77,7 +88,7 @@ for pop_idx in range(out.ctx.nodes):
 incidence = np.array(incidence)
 
 df = pd.DataFrame(incidence)
-df.to_csv('/Users/averydrennan/ParticleFilter/PF_Estimation/data_sets/epy_inc.csv')
+df.to_csv('./data_sets/epy_inc.csv')
 
 plot_event(out,0)
 

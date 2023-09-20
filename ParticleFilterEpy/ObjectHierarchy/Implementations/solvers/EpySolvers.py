@@ -12,26 +12,26 @@ class EpymorphSolver(Integrator):
 
     def propagate(self, particleArray: List[Particle], ctx: Context,pool) -> List[Particle]:
 
-        # args = [(ctx,particle) for particle in particleArray]
-        # particleArray = pool.starmap(self.sub,args)
+        args = [(ctx,particle) for particle in particleArray]
+        particleArray = pool.starmap(self.sub,args)
 
-        for j,particle in enumerate(particleArray): 
-            param = particle.param
-            compartments = particle.state
+        # for j,particle in enumerate(particleArray): 
+        #     param = particle.param
+        #     compartments = particle.state
 
-            sim = ParticleSimulation(
-                geo=ctx.geo,
-                ipm_builder=ctx.ipm_builder,
-                mvm_builder=ctx.mvm_builder,
-                tick_index = 0,
-                param=param, 
-                compartments=compartments
-            )
+        #     sim = ParticleSimulation(
+        #         geo=ctx.geo,
+        #         ipm_builder=ctx.ipm_builder,
+        #         mvm_builder=ctx.mvm_builder,
+        #         tick_index = 0,
+        #         param=param, 
+        #         compartments=compartments
+        #     )
 
-            incidence = sim.step() + sim.step()
+        #     incidence = sim.step() + sim.step()
             
-            particleArray[j].observation = incidence[:,0]
-            particleArray[j].state = np.array(sim.get_compartments())
+        #     particleArray[j].observation = incidence[:,0]
+        #     particleArray[j].state = np.array(sim.get_compartments())
 
         return particleArray
 
