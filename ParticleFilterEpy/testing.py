@@ -26,7 +26,7 @@ if __name__ == '__main__':
                             perturb=perturb,
                             resampler=resample,
                             ctx=Context(observation_data=data,
-                                        particle_count=10000,
+                                        particle_count=1000,
                                         seed_size=0.01,
                                         geo=load(),
                                         ipm_builder=ipm_library['sirs'](),
@@ -37,5 +37,6 @@ if __name__ == '__main__':
     algo.initialize({"beta":np.array([-1,-1]),"gamma":np.array([0.25]),"xi":np.array([1/90]),"theta":np.array([0.1]),"move_control":np.array([0.9])})
 
     out = algo.run()
+
     # plot(out,1)
 

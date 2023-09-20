@@ -11,6 +11,7 @@ from epymorph.ipm.ipm import Ipm, IpmBuilder
 from epymorph.movement.basic import BasicEngine
 from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
 import matplotlib.pyplot as plt
+import multiprocessing as mp
 import numpy as np
 
 
@@ -29,10 +30,10 @@ class Epymorph_PF(Algorithm):
         self.output = Output(observation_data=self.ctx.observation_data)
 
         beta=[]
-
+        pool = mp.Pool(mp.cpu_count())
         '''main run loop'''
         while self.ctx.clock.time < int((self.ctx.observation_data[:,0].size)): 
-            self.particles = self.integrator.propagate(self.particles,self.ctx)
+            self.particles = self.integrator.propagate(self.particles,self.ctx,pool)
             weights = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
             self.particles = self.resampler.resample(weights=weights,ctx=self.ctx,particleArray=self.particles)
             self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)

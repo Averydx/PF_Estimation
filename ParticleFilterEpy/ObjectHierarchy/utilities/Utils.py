@@ -60,6 +60,7 @@ class Context:
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
     seed_size: float = 0.01 #number of initial infected
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
+    
 
     
 '''Decorator for timing function calls '''
