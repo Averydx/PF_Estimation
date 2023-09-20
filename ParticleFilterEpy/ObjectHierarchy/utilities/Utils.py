@@ -9,6 +9,7 @@ from time import perf_counter
 from epymorph.geo import Geo
 from epymorph.ipm.ipm import Ipm, IpmBuilder
 from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
+import multiprocessing as mp
 import os.path
 
 '''Wrapper for dataset parsing using pandas, wraps to_csv with protections'''
@@ -60,6 +61,7 @@ class Context:
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
     seed_size: float = 0.01 #number of initial infected
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
+    process_pool: mp.Pool = field(default_factory=lambda: mp.Pool(mp.cpu_count()))
     
 
     

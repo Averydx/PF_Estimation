@@ -1,8 +1,9 @@
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from typing import List,Dict
 import numpy as np
+from numpy.typing import NDArray
 #from utilities.utility import multivariate_normal
-from ObjectHierarchy.utilities.Utils import Context,Particle,multivariate_normal
+from ObjectHierarchy.utilities.Utils import Context,Particle,multivariate_normal,timing
 from epymorph.util import check_ndarray
 
 
@@ -13,19 +14,30 @@ class ParamOnlyMultivariate(Perturb):
         self.Flags = {"all_size_valid":True}
         if(not 'cov' in self.hyperparameters):
            raise Exception("covariance matrix is not defined -please define the covariance as an scalar in this object's constructor, it will be manually broadcast to a diagional array")
-
+    @timing
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
         cov = np.diag([self.hyperparameters['cov'] for _ in range(len(particleArray[0].param['beta']))])
         A = np.linalg.cholesky(cov)
-        for i,_ in enumerate(particleArray): 
-            for estimated_param in ctx.estimated_params:
-                perturbed = np.log(particleArray[i].param[estimated_param])
-                perturbed = np.exp(multivariate_normal(perturbed,A))
-                particleArray[i].param[estimated_param] = perturbed
+        # for i,_ in enumerate(particleArray): 
+        #     for estimated_param in ctx.estimated_params:
+        #         perturbed = np.log(particleArray[i].param[estimated_param])
+        #         perturbed = np.exp(multivariate_normal(perturbed,A))
+        #         particleArray[i].param[estimated_param] = perturbed
+
+        args = [(ctx.estimated_params,A,particle) for particle in particleArray]
+        particleArray = ctx.process_pool.starmap(self.sub,args)
 
         
 
         return particleArray
+    
+    def sub(self,estimated_params:List,A:NDArray,particle:Particle):
+        for estimated_param in estimated_params:
+            perturbed = np.log(particle.param[estimated_param])
+            perturbed = np.exp(multivariate_normal(perturbed,A))
+            particle.param[estimated_param] = perturbed
+
+        return particle
 
 '''Multivariate normal perturbations to all parameters and state variables after log transform'''
 class MultivariatePerturbations(Perturb): 
