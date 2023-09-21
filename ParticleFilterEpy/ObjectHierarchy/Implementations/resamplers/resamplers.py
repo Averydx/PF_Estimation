@@ -142,6 +142,13 @@ class LogMultivariatePoissonResample(Resampler):
                 weights[i] += np.log(self.likelihood(observation=observation[j],particle_observations=particle.observation[j]))
    
         weights = np.exp(weights-np.max(weights))
+        for j in range(len(particleArray)):  
+            if(weights[j] == 0):
+                weights[j] = 10**-300 
+            elif(np.isnan(weights[j])):
+                weights[j] = 10**-300
+            elif(np.isinf(weights[j])):
+                weights[j] = 10**-300
         weights /= np.sum(weights)
         return np.squeeze(weights)
     
