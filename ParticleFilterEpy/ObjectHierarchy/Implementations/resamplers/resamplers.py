@@ -125,5 +125,39 @@ class MultivariateNormalResample(Resampler):
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
     
+'''log multivariate resampler'''
+class LogMultivariateMultivariateNormalResample(Resampler): 
+  
+    def __init__(self,cov) -> None:
+        super().__init__(joint_likelihood_normal)
+        self.Flags = {"all_size_valid":True}
+        self.cov = cov
 
+
+#TODO Debug invalid weights in divide 
+    def compute_weights(self, observation: NDArray, particleArray:List[Particle]) -> NDArray[np.float_]:
+        p_obvs = np.array([particle.observation for particle in particleArray])
+        weights = np.zeros(len(p_obvs))
+        for i,particle in enumerate(particleArray):
+            weights[i] = joint_likelihood_normal(observation=observation,particle_observations=particle.observation,cov=self.cov)
+
+        for j in range(len(particleArray)):  
+            if(weights[j] == 0):
+                weights[j] = 10**-300 
+            elif(np.isnan(weights[j])):
+                weights[j] = 10**-300
+            elif(np.isinf(weights[j])):
+                weights[j] = 10**-300
+
+
+        weights = weights/np.sum(weights)
+
+        
+        
+            
+        return np.squeeze(weights)
+    
+    def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
+        return super().resample(weights, ctx,particleArray)
+    
     

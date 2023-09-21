@@ -1,5 +1,5 @@
 
-from ObjectHierarchy.utilities.Utils import Particle,Context
+from ObjectHierarchy.utilities.Utils import Particle,Context,timing
 from ObjectHierarchy.utilities.particle_simulation import ParticleSimulation
 from ObjectHierarchy.Abstract.Integrator import Integrator
 from epymorph.data import geo_library,ipm_library,mm_library
@@ -12,7 +12,7 @@ import numpy as np
 import multiprocessing as mp
 
 class EpymorphSolver(Integrator): 
-
+    @timing
     def propagate(self, particleArray: List[Particle], ctx: Context) -> List[Particle]:
 
         args = [(ctx.geo,ctx.ipm_builder,ctx.mvm_builder,particle) for particle in particleArray]

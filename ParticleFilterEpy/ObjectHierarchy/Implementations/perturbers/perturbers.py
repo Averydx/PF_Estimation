@@ -14,7 +14,7 @@ class ParamOnlyMultivariate(Perturb):
         self.Flags = {"all_size_valid":True}
         if(not 'cov' in self.hyperparameters):
            raise Exception("covariance matrix is not defined -please define the covariance as an scalar in this object's constructor, it will be manually broadcast to a diagional array")
-    @timing
+
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
         cov = np.diag([self.hyperparameters['cov'] for _ in range(len(particleArray[0].param['beta']))])
         A = np.linalg.cholesky(cov)

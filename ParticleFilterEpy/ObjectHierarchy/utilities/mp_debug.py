@@ -39,6 +39,7 @@ if __name__ == '__main__':
     t0 = perf_counter()
     print(mp.cpu_count())
     with mp.Pool(mp.cpu_count()) as executor:
+
         particles =executor.map(propagate, particles)
 
     t1 = perf_counter()
