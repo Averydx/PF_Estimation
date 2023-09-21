@@ -64,8 +64,10 @@ class Algorithm(ABC):
             state = []
 
             '''Create initial compartment values for both the population with the initial infection and the ones without dynamically'''
+            infection_location = self.ctx.rng.integers(0,self.ctx.geo.nodes)
             for index,pop in enumerate(pops): 
-                if(index == 0):
+                
+                if(index == infection_location):
                     substate = [pop-initial_infected,initial_infected]
                     for _ in range(self.ctx.ipm_builder.compartments-2):
                         substate.append(0)
