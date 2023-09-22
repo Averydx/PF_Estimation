@@ -58,7 +58,7 @@ class Algorithm(ABC):
                         break
                     raise Exception(f"estimated parameter:{param} shape and data shape mismatch!")
 
-            '''Draw a random int to represent the initial infected'''
+            '''Draw a random int to represent the initial infection node and the initial_infected amount'''
             infection_location = self.ctx.rng.integers(0,self.ctx.geo.nodes)
             pops = self.ctx.geo.data['population'] 
             initial_infected = self.ctx.rng.integers(0,np.round(self.ctx.seed_size*pops[infection_location]))
