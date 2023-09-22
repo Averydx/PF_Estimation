@@ -12,7 +12,7 @@ import numpy as np
 import multiprocessing as mp
 
 class EpymorphSolver(Integrator): 
-    @timing
+
     def propagate(self, particleArray: List[Particle], ctx: Context) -> List[Particle]:
 
         args = [(ctx.geo,ctx.ipm_builder,ctx.mvm_builder,particle) for particle in particleArray]

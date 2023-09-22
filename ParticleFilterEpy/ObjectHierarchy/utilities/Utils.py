@@ -20,7 +20,9 @@ def get_observations(filePath: str)->NDArray:
     
     return df.to_numpy()
 
-'''pass in the cholesky decomp of the cov matrix, important because the cholesky decomp is only calculated once --NOT CALCULATED INSIDE FUNCTION--'''
+'''pass in the cholesky decomposition of the cov matrix, 
+important because the cholesky decomp is only calculated once --NOT CALCULATED INSIDE FUNCTION--
+Assumes the covariance matrix will be positive definite'''
 def multivariate_normal(mean,A):
 
     x = np.random.standard_normal(mean.shape)
@@ -41,7 +43,7 @@ class Clock:
     def reset(self): 
         self.time = 0
 
-'''The basic particle class'''
+'''The basic particle class-No fields make assumptions about their size, passing in arbitrary sized geos should be possible'''
 @dataclass
 class Particle: 
     param: Dict
@@ -58,10 +60,10 @@ class Context:
     mvm_builder: MovementBuilder #Class that builds the movement model
     particle_count: int = 1000
     clock: Clock = field(default_factory=lambda: Clock())
-    rng:random.Generator = field(default_factory=lambda: np.random.default_rng())
+    rng:random.Generator = field(default_factory=lambda: np.random.default_rng()) #uses the default numpy rng   
     seed_size: float = 0.01 #number of initial infected
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
-    process_pool: mp.Pool = field(default_factory=lambda: mp.Pool(mp.cpu_count()))
+    process_pool: mp.Pool = field(default_factory=lambda: mp.Pool(mp.cpu_count())) #A process pool that instantiates a number of python processes equal to the core count
     
 
     

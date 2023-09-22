@@ -10,6 +10,10 @@ from numpy.typing import NDArray
 def likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDArray: 
         return poisson.pmf(k=observation,mu=particle_observations)
 
+def log_likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDArray: 
+        return poisson.logpmf(k=observation,mu=particle_observations)
+
+
 def likelihood_NB(observation,particle_observations:NDArray[np.int_],var:float)->NDArray: 
     X = np.zeros(len(particle_observations))
 
@@ -125,11 +129,12 @@ class MultivariateNormalResample(Resampler):
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         return super().resample(weights, ctx,particleArray)
     
-'''log multivariate resampler'''
+'''log multivariate poisson resampler --not using a poisson model with covariance between the random variables, 
+assumes every observation in the observation vector is a poisson random variable'''
 class LogMultivariatePoissonResample(Resampler): 
   
     def __init__(self) -> None:
-        super().__init__(likelihood_poisson)
+        super().__init__(log_likelihood_poisson)
         self.Flags = {"all_size_valid":True}
 
 
@@ -139,21 +144,23 @@ class LogMultivariatePoissonResample(Resampler):
         weights = np.zeros(len(p_obvs))
         for i,particle in enumerate(particleArray):
             for j in range(len(particle.observation)): 
-                weights[i] += np.log(self.likelihood(observation=observation[j],particle_observations=particle.observation[j]))
+                weights[i] += (self.likelihood(observation=observation[j],particle_observations=particle.observation[j]))
    
         weights = np.exp(weights-np.max(weights))
-        for j in range(len(particleArray)):  
-            if(weights[j] == 0):
-                weights[j] = 10**-300 
-            elif(np.isnan(weights[j])):
-                weights[j] = 10**-300
-            elif(np.isinf(weights[j])):
-                weights[j] = 10**-300
+        # for j in range(len(particleArray)):  
+        #     if(weights[j] == 0):
+        #         weights[j] = 10**-300 
+        #     elif(np.isnan(weights[j])):
+        #         weights[j] = 10**-300
+        #     elif(np.isinf(weights[j])):
+        #         weights[j] = 10**-300
         weights /= np.sum(weights)
+
         return np.squeeze(weights)
     
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         
+        '''Resample generally calls out to the super to do the actual resampling'''
         return super().resample(weights=weights,ctx=ctx,particleArray=particleArray)
     
     

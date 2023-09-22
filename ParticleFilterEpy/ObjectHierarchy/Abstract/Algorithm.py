@@ -15,6 +15,11 @@ import pandas as pd
 
 class Algorithm(ABC): 
 
+    '''The basic fields of an algorithm implementation
+    Integrator,perturb, and resampler are extensions of their abstract base classes as defined in the Abstract directory
+    
+    Context and Particle are defined in utilities/Utils.py
+    '''
     integrator: Integrator
     perturb: Perturb
     resampler: Resampler
@@ -65,11 +70,12 @@ class Algorithm(ABC):
             state = []
 
             '''Create initial compartment values for both the population with the initial infection and the ones without dynamically'''
-            
             for index,pop in enumerate(pops): 
                 
                 if(index == infection_location):
                     substate = [pop-initial_infected,initial_infected]
+                    '''Appends a list of zeros after instantiating the desired compartments of the state vector
+                      to represent the initial seed'''
                     for _ in range(self.ctx.ipm_builder.compartments-2):
                         substate.append(0)
 
@@ -90,14 +96,15 @@ class Algorithm(ABC):
 
         
 
+    '''Entirely implementation defined-requires only an Output return at the end, 
+    general template is defined elsewhere in Documentation'''
     @abstractmethod
     def run(self) ->Output:
         pass
         
 
-
-
     '''Callables'''
+    
 
     '''Prints the particle swarm in a human readable format'''
     def print_particles(self): 

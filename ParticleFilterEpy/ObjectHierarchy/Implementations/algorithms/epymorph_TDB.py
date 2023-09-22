@@ -34,6 +34,7 @@ class Epymorph_PF(Algorithm):
         while self.ctx.clock.time < int((self.ctx.observation_data[:,0].size)): 
             self.particles = self.integrator.propagate(self.particles,self.ctx)
             weights = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
+            print(weights)
             self.particles = self.resampler.resample(weights=weights,ctx=self.ctx,particleArray=self.particles)
             self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
 
@@ -42,6 +43,9 @@ class Epymorph_PF(Algorithm):
             self.ctx.clock.tick()
             print(f"iteration: {self.ctx.clock.time}")  
 
+        plt.title("Beta Over Time")
+        plt.xlabel("Time(days)")
+        plt.ylabel("Beta")
         plt.plot(beta)
         plt.show()
 

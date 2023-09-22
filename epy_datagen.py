@@ -60,6 +60,7 @@ def beta_5(t):
 
     return 0.7+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
 
+beta_cos_5 = np.array([beta_5(t) for t in range(300)])
 beta_cos_4 = np.array([beta_4(t) for t in range(300)])
 beta_cos_3 = np.array([beta_3(t) for t in range(300)])
 beta_cos_2 = np.array([beta_2(t) for t in range(300)])
@@ -68,6 +69,7 @@ plt.plot(beta_cos)
 plt.plot(beta_cos_2)
 plt.plot(beta_cos_3)
 plt.plot(beta_cos_4)
+plt.plot(beta_cos_5)
 plt.show()
 
 betas = np.zeros((300,6))
@@ -77,7 +79,7 @@ betas[:,1] = beta_cos_2
 betas[:,2] = beta_cos_3
 betas[:,3] = beta_cos_4
 betas[:,4] = beta_cos_3
-betas[:,5] = beta_cos_4
+betas[:,5] = beta_cos_5
 
 
 sim = Simulation(
@@ -88,7 +90,7 @@ sim = Simulation(
 
 out = sim.run(
     param={
-        'beta':[0.4,0.1,0.3,0.4,0.5,0.6],
+        'beta':betas,
         'gamma':0.25,
         'xi':1/90,
         'theta': 0.1,

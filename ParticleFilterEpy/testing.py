@@ -13,6 +13,9 @@ import numpy as np
 
 
 
+'''Using a __name__ main is required for the multiprocessing module to integrate nicely, 
+if wrapping basic functions elsewhere this must be included if using multiprocessing mapping functions
+Note: using Multiprocessing is not required, although my basic implementations do use it for speed reasons'''
 if __name__ == '__main__':
 
     np.set_printoptions(suppress=True)
@@ -32,7 +35,7 @@ if __name__ == '__main__':
                                         geo=geo_library['pei'](),
                                         ipm_builder=ipm_library['sirs'](),
                                         mvm_builder=mm_library['pei'](),
-                                        rng = np.random.default_rng(1)))
+                                        rng = np.random.default_rng()))
 
 
     algo.initialize({"beta":np.array([-1,-1,-1,-1,-1,-1]),"gamma":np.array([0.25]),"xi":np.array([1/90]),"theta":np.array([0.1]),"move_control":np.array([0.9])})
