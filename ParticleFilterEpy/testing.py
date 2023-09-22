@@ -29,7 +29,7 @@ if __name__ == '__main__':
                             ctx=Context(observation_data=data,
                                         particle_count=1000,
                                         seed_size=0.01,
-                                        geo=geo_library['pei']()  ,
+                                        geo=geo_library['pei'](),
                                         ipm_builder=ipm_library['sirs'](),
                                         mvm_builder=mm_library['pei'](),
                                         rng = np.random.default_rng(1)))

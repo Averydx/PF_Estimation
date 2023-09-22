@@ -59,12 +59,13 @@ class Algorithm(ABC):
                     raise Exception(f"estimated parameter:{param} shape and data shape mismatch!")
 
             '''Draw a random int to represent the initial infected'''
+            infection_location = self.ctx.rng.integers(0,self.ctx.geo.nodes)
             pops = self.ctx.geo.data['population'] 
-            initial_infected = self.ctx.rng.integers(0,np.round(self.ctx.seed_size*pops[0]))
+            initial_infected = self.ctx.rng.integers(0,np.round(self.ctx.seed_size*pops[infection_location]))
             state = []
 
             '''Create initial compartment values for both the population with the initial infection and the ones without dynamically'''
-            infection_location = self.ctx.rng.integers(0,self.ctx.geo.nodes)
+            
             for index,pop in enumerate(pops): 
                 
                 if(index == infection_location):
