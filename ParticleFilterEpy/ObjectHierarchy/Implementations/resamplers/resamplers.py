@@ -13,7 +13,6 @@ def likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDAr
 def log_likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDArray: 
         return poisson.logpmf(k=observation,mu=particle_observations)
 
-
 def likelihood_NB(observation,particle_observations:NDArray[np.int_],var:float)->NDArray: 
     X = np.zeros(len(particle_observations))
 
@@ -27,6 +26,9 @@ def likelihood_normal(observation,particle_observations:NDArray[np.int_],var)->N
 
 def joint_likelihood_normal(observation:NDArray[np.int_],particle_observations:NDArray[np.int_],cov:int): 
     return multivariate_normal.pdf(observation,mean = particle_observations,cov = cov)
+
+def log_likelihood_normal(observation:NDArray[np.int_],particle_observations:NDArray[np.int_],cov:int): 
+    return norm.logpdf(observation,particle_observations,cov)
 
 '''Resampler using the negative binomial probability mass function to compute the weights'''
 class NBResample(Resampler):
@@ -145,22 +147,80 @@ class LogMultivariatePoissonResample(Resampler):
         for i,particle in enumerate(particleArray):
             for j in range(len(particle.observation)): 
                 weights[i] += (self.likelihood(observation=observation[j],particle_observations=particle.observation[j]))
-   
-        weights = np.exp(weights-np.max(weights))
-        # for j in range(len(particleArray)):  
-        #     if(weights[j] == 0):
-        #         weights[j] = 10**-300 
-        #     elif(np.isnan(weights[j])):
-        #         weights[j] = 10**-300
-        #     elif(np.isinf(weights[j])):
-        #         weights[j] = 10**-300
+
+        weights = weights-np.max(weights)
+        #weights = log_norm(weights)
+        weights = np.exp(weights)
+        for j in range(len(particleArray)):  
+            if(weights[j] == 0):
+                weights[j] = 10**-300 
+            elif(np.isnan(weights[j])):
+                weights[j] = 10**-300
+            elif(np.isinf(weights[j])):
+                weights[j] = 10**-300
+
         weights /= np.sum(weights)
 
+   
+
+        
         return np.squeeze(weights)
     
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         
-        '''Resample generally calls out to the super to do the actual resampling'''
-        return super().resample(weights=weights,ctx=ctx,particleArray=particleArray)
+        # log_cdf = np.zeros(ctx.particle_count)
+        # log_cdf[0] = weights[0]
+        # for j in range(1,ctx.particle_count): 
+        #     log_cdf[j] = max(weights[j],log_cdf[j-1]) + np.log(1 + np.exp(-1*np.abs(log_cdf[j-1] - weights[j])))
+
+        # i = 0
+        # indices = np.zeros(ctx.particle_count)
+        # u = np.zeros(ctx.particle_count)
+        # u[0] = ctx.rng.uniform(0,1/ctx.particle_count)
+        # for j in range(0,ctx.particle_count): 
+        #     u[j] = np.log(u[0] + 1/ctx.particle_count * j)
+        #     while u[j] > log_cdf[i]: 
+        #         i += 1
+        #     indices[j] = i
+
+        # indices=indices.astype(int)
+        # particleCopy = particleArray.copy()
+        # for i in range(len(particleArray)): 
+        #     particleArray[i] = Particle(particleCopy[indices[i]].param.copy(),particleCopy[indices[i]].state.copy(),particleCopy[indices[i]].observation)
+
+        '''Resample generally calls out to the super to do the actual resampling, although a custom resampler can override the base implementation'''
+        return super().resample(weights,ctx,particleArray)
     
+'''It's possible a distribution that has a variance parameter might work more nicely for our purposes in the multivariate case'''
+class LogNormalResample(Resampler): 
+    cov: int
+
+    def __init__(self,cov) -> None:
+        super().__init__(log_likelihood_normal)
+        self.Flags = {"all_size_valid":True}
+        self.cov = cov
+
+#TODO Debug invalid weights in divide 
+    def compute_weights(self, observation: NDArray, particleArray:List[Particle]) -> NDArray[np.float_]:
+        p_obvs = np.array([particle.observation for particle in particleArray])
+        weights = np.zeros(len(p_obvs))
+        for i,particle in enumerate(particleArray):
+            for j in range(len(particle.observation)): 
+                weights[i] += (self.likelihood(observation=observation[j],particle_observations=particle.observation[j],cov = self.cov))
+
+        weights = weights-np.max(weights)
+        #weights = log_norm(weights)
+        weights = np.exp(weights)
+        for j in range(len(particleArray)):  
+            if(weights[j] == 0):
+                weights[j] = 10**-300 
+            elif(np.isnan(weights[j])):
+                weights[j] = 10**-300
+            elif(np.isinf(weights[j])):
+                weights[j] = 10**-300
+
+        weights /= np.sum(weights)
+        return np.squeeze(weights)
     
+    def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
+        return super().resample(weights, ctx,particleArray)

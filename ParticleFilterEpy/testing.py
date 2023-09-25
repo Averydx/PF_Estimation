@@ -1,6 +1,6 @@
 
 from ObjectHierarchy.Implementations.solvers.EpySolvers import EpymorphSolver
-from ObjectHierarchy.Implementations.resamplers.resamplers import MultivariateNormalResample,PoissonResample,LogMultivariatePoissonResample
+from ObjectHierarchy.Implementations.resamplers.resamplers import MultivariateNormalResample,PoissonResample,LogMultivariatePoissonResample,LogNormalResample
 from ObjectHierarchy.Implementations.algorithms.epymorph_TDB import Epymorph_PF
 from ObjectHierarchy.Implementations.perturbers.perturbers import ParamOnlyMultivariate
 from ObjectHierarchy.utilities.Utils import Context,get_observations,jacob,log_norm
@@ -21,7 +21,7 @@ if __name__ == '__main__':
     np.set_printoptions(suppress=True)
     solver = EpymorphSolver()
     perturb = ParamOnlyMultivariate(params={"cov":0.01})
-    resample = LogMultivariatePoissonResample()
+    resample = LogNormalResample(cov=50)
 
     data = get_observations(filePath="./data_sets/epy_inc.csv")
     data = np.delete(data,0,1)
@@ -30,12 +30,12 @@ if __name__ == '__main__':
                             perturb=perturb,
                             resampler=resample,
                             ctx=Context(observation_data=data,
-                                        particle_count=1000,
+                                        particle_count=10000,
                                         seed_size=0.01,
                                         geo=geo_library['pei'](),
                                         ipm_builder=ipm_library['sirs'](),
                                         mvm_builder=mm_library['pei'](),
-                                        rng = np.random.default_rng()))
+                                        rng = np.random.default_rng(10)))
 
 
     algo.initialize({"beta":np.array([-1,-1,-1,-1,-1,-1]),"gamma":np.array([0.25]),"xi":np.array([1/90]),"theta":np.array([0.1]),"move_control":np.array([0.9])})

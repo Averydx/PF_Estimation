@@ -60,11 +60,11 @@ def beta_5(t):
 
     return 0.7+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
 
-beta_cos_5 = np.array([beta_5(t) for t in range(300)])
-beta_cos_4 = np.array([beta_4(t) for t in range(300)])
-beta_cos_3 = np.array([beta_3(t) for t in range(300)])
-beta_cos_2 = np.array([beta_2(t) for t in range(300)])
-beta_cos = np.array([beta(t) for t in range(300)])
+beta_cos_5 = np.array([beta_5(t) for t in range(100)])
+beta_cos_4 = np.array([beta_4(t) for t in range(100)])
+beta_cos_3 = np.array([beta_3(t) for t in range(100)])
+beta_cos_2 = np.array([beta_2(t) for t in range(100)])
+beta_cos = np.array([beta(t) for t in range(100)])
 plt.plot(beta_cos)
 plt.plot(beta_cos_2)
 plt.plot(beta_cos_3)
@@ -72,7 +72,7 @@ plt.plot(beta_cos_4)
 plt.plot(beta_cos_5)
 plt.show()
 
-betas = np.zeros((300,6))
+betas = np.zeros((100,6))
 
 betas[:,0] = beta_cos
 betas[:,1] = beta_cos_2
@@ -99,10 +99,12 @@ out = sim.run(
         'immunity_duration': 90.0,
     },
     start_date=date(2015, 1, 1),
-    duration_days=300,
+    duration_days=100,
     initializer=partial(single_location, location=0, seed_size=10_000),
     rng=np.random.default_rng(1)
 )
+
+print(out.prevalence[:,:])
 
 incidence = []
 for pop_idx in range(out.ctx.nodes):

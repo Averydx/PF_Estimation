@@ -6,11 +6,12 @@ from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Perturb import Perturb
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
-from ObjectHierarchy.utilities.Utils import Context,Particle,quantiles,timing
+from ObjectHierarchy.utilities.Utils import Context,Particle,quantiles,timing,jacob
 from epymorph.ipm.ipm import Ipm, IpmBuilder
 from epymorph.movement.basic import BasicEngine
 from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
 import matplotlib.pyplot as plt
+from matplotlib.cm import plasma
 import multiprocessing as mp
 import numpy as np
 
@@ -30,12 +31,16 @@ class Epymorph_PF(Algorithm):
         self.output = Output(observation_data=self.ctx.observation_data)
 
         beta=[]
+        mean_state = []
         '''main run loop'''
         while self.ctx.clock.time < int((self.ctx.observation_data[:,0].size)): 
             self.particles = self.integrator.propagate(self.particles,self.ctx)
             weights = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
-            print(weights)
-            self.particles = self.resampler.resample(weights=weights,ctx=self.ctx,particleArray=self.particles)
+        
+            mean_state.append((np.mean([particle.state for particle in self.particles],axis=0)))
+            print(np.mean([particle.state for particle in self.particles],axis=0))
+
+            self.particles = self.resampler.resample(weights=(weights),ctx=self.ctx,particleArray=self.particles)
             self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
 
             '''output updates, not part of the main algorithm'''
@@ -49,6 +54,9 @@ class Epymorph_PF(Algorithm):
         plt.plot(beta)
         plt.show()
 
+
+
+       
         return self.output    
 
 
