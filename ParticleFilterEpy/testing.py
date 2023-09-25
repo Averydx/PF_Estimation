@@ -21,7 +21,7 @@ if __name__ == '__main__':
     np.set_printoptions(suppress=True)
     solver = EpymorphSolver()
     perturb = ParamOnlyMultivariate(params={"cov":0.01})
-    resample = LogNormalResample(cov=50)
+    resample = LogMultivariatePoissonResample()
 
     data = get_observations(filePath="./data_sets/epy_inc.csv")
     data = np.delete(data,0,1)
@@ -30,7 +30,7 @@ if __name__ == '__main__':
                             perturb=perturb,
                             resampler=resample,
                             ctx=Context(observation_data=data,
-                                        particle_count=10000,
+                                        particle_count=1000,
                                         seed_size=0.01,
                                         geo=geo_library['pei'](),
                                         ipm_builder=ipm_library['sirs'](),

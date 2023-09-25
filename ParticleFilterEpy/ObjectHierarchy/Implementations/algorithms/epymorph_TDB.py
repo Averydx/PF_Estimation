@@ -40,7 +40,10 @@ class Epymorph_PF(Algorithm):
             mean_state.append((np.mean([particle.state for particle in self.particles],axis=0)))
             print(np.mean([particle.state for particle in self.particles],axis=0))
 
-            self.particles = self.resampler.resample(weights=(weights),ctx=self.ctx,particleArray=self.particles)
+
+            if(1/np.sum(weights**2) < self.ctx.particle_count/4): 
+                self.particles = self.resampler.resample(weights=(weights),ctx=self.ctx,particleArray=self.particles)
+                print("Resampled")
             self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
 
             '''output updates, not part of the main algorithm'''
