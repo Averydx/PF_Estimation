@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     np.set_printoptions(suppress=True)
     solver = EpymorphSolver()
-    perturb = ParamOnlyMultivariate(params={"cov":0.01})
+    perturb = ParamOnlyMultivariate(params={"cov":0.1})
     resample = LogMultivariatePoissonResample()
 
     data = get_observations(filePath="./data_sets/epy_inc.csv")

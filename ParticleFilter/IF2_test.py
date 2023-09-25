@@ -9,7 +9,7 @@ from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResampl
 import numpy as np
 import pandas as pd
 
-real_beta = pd.read_csv('./data_sets/3_day_moving_avg.csv')
+real_beta = pd.read_csv('./data_sets/FLU_HOSPITALIZATIONS.csv')
 real_beta = np.squeeze(real_beta.to_numpy()) 
 real_beta = np.delete(real_beta,0,1)
 
@@ -21,7 +21,7 @@ resample = PoissonResample()
 algo = IF2(integrator=solver,
                          perturb=perturb,
                          resampler=resample,
-                         context=Context(population=4_497_000,state_size=4,additional_hyperparameters={"m":200},particle_count=10000))
+                         context=Context(population=7_000_000,state_size=4,additional_hyperparameters={"m":200},particle_count=1000))
 algo.initialize({"beta":-1,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0})
 
 
