@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     np.set_printoptions(suppress=True)
     solver = EpymorphSolver()
-    perturb = ParamOnlyMultivariate(params={"cov":0.1})
+    perturb = ParamOnlyMultivariate(params={"cov":0.01})
     resample = LogMultivariatePoissonResample()
 
     data = get_observations(filePath="./data_sets/epy_inc.csv")
@@ -32,13 +32,14 @@ if __name__ == '__main__':
                             ctx=Context(observation_data=data,
                                         particle_count=1000,
                                         seed_size=0.01,
-                                        geo=geo_library['pei'](),
+                                        geo=load(),
                                         ipm_builder=ipm_library['sirs'](),
                                         mvm_builder=mm_library['pei'](),
-                                        rng = np.random.default_rng(10)))
+                                        estimation_scale = 1,
+                                        rng = np.random.default_rng()))
 
 
-    algo.initialize({"beta":np.array([-1,-1,-1,-1,-1,-1]),"gamma":np.array([0.25]),"xi":np.array([1/90]),"theta":np.array([0.1]),"move_control":np.array([0.9])})
+    algo.initialize({"beta":np.array([-1,-1,-1,-1]),"gamma":np.array([-1]),"xi":np.array([1/90]),"theta":np.array([0.1]),"move_control":np.array([0.9])})
     out = algo.run()
 
 

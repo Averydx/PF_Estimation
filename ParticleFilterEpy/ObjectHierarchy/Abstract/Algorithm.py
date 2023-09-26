@@ -87,9 +87,10 @@ class Algorithm(ABC):
                 state.append(substate)
 
             state = np.array(state)      
-            observation = np.array([0 for _ in range(self.ctx.geo.nodes)])
+            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=np.array([]),weight = 1/self.ctx.particle_count))
+            self.zero_observations(); 
 
-            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=observation))
+            
 
     
 
@@ -107,7 +108,7 @@ class Algorithm(ABC):
     
 
     '''Prints the particle swarm in a human readable format'''
-    def print_particles(self): 
+    def print_particles(self)->None: 
         for i,particle in enumerate(self.particles): 
             print(f"{i}: {particle}")
 
@@ -119,6 +120,10 @@ class Algorithm(ABC):
         
         if(self.ctx.geo.nodes > 1 and self.perturb.Flags['all_size_valid'] is False):
             raise Exception("Perturber is incompatible with geos of dim > 1")
+        
+    def zero_observations(self)->None: 
+        for particle in self.particles: 
+            particle.observation = np.array([0 for _ in range(self.ctx.geo.nodes)])
 
 
 

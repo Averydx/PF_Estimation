@@ -1,5 +1,5 @@
 from abc import ABC,abstractmethod
-from typing import Tuple,List
+from typing import Tuple,List,Dict
 from numpy.typing import NDArray
 from numpy import int_
 from ObjectHierarchy.utilities.Utils import Particle,Context

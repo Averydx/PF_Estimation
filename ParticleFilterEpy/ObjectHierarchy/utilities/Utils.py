@@ -49,6 +49,7 @@ class Particle:
     param: Dict
     state: NDArray
     observation: NDArray
+    weight: float
 
 '''Metadata about the algorithm'''
 @dataclass(frozen=True)
@@ -63,6 +64,7 @@ class Context:
     rng:random.Generator = field(default_factory=lambda: np.random.default_rng()) #uses the default numpy rng   
     seed_size: float = 0.01 #number of initial infected
     estimated_params: List[str] = field(default_factory=lambda: []) #number of estimated parameters in the model 
+    estimation_scale: int = 1 #The scale at which to perturb beta, 1 is daily, 7 is weekly, etc.
     process_pool: mp.Pool = field(default_factory=lambda: mp.Pool(mp.cpu_count())) #A process pool that instantiates a number of python processes equal to the core count
     
 
@@ -105,8 +107,19 @@ def log_norm(log_weights:NDArray):
     log_weights -= norm
     return log_weights
 
+'''computes the log mean of the parameter of interest'''
+def log_mean(particleArray:List[Particle],estimated_param:str):
+    return np.sum([np.log(particle.param[estimated_param]) for _,particle in enumerate(particleArray)],axis=0)
 
+'''computes the log covariance matrix of the parameter of interest'''
+def log_cov(particleArray:List[Particle],estimated_param:str): 
+    eta = log_mean(particleArray,estimated_param)
+    vec = np.array([np.log(particle.param[estimated_param]) - eta for _,particle in enumerate(particleArray)])
+    sigma = 0
+    for i,_ in enumerate(particleArray): 
+        sigma += np.outer(vec[i],vec[i].T)
 
+    return sigma
 
 
 

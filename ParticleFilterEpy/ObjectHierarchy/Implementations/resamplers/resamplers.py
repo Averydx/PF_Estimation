@@ -151,22 +151,25 @@ class LogMultivariatePoissonResample(Resampler):
         weights = weights-np.max(weights)
         #weights = log_norm(weights)
         weights = np.exp(weights)
+        weights /= np.sum(weights)
         for j in range(len(particleArray)):  
             if(weights[j] == 0):
-                weights[j] = 10**-300 
+                weights[j] = 0
             elif(np.isnan(weights[j])):
-                weights[j] = 10**-300
+                weights[j] = 0
             elif(np.isinf(weights[j])):
-                weights[j] = 10**-300
+                weights[j] = 0
 
-        weights /= np.sum(weights)
+            particleArray[j].weight = weights[j]
+
+        
 
    
 
         
         return np.squeeze(weights)
     
-    def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
+    def resample(self, ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         
         # log_cdf = np.zeros(ctx.particle_count)
         # log_cdf[0] = weights[0]
@@ -189,7 +192,7 @@ class LogMultivariatePoissonResample(Resampler):
         #     particleArray[i] = Particle(particleCopy[indices[i]].param.copy(),particleCopy[indices[i]].state.copy(),particleCopy[indices[i]].observation)
 
         '''Resample generally calls out to the super to do the actual resampling, although a custom resampler can override the base implementation'''
-        return super().resample(weights,ctx,particleArray)
+        return super().resample(ctx,particleArray)
     
 '''It's possible a distribution that has a variance parameter might work more nicely for our purposes in the multivariate case'''
 class LogNormalResample(Resampler): 

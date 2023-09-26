@@ -33,23 +33,28 @@ class Epymorph_PF(Algorithm):
         beta=[]
         mean_state = []
         '''main run loop'''
-        while self.ctx.clock.time < int((self.ctx.observation_data[:,0].size)): 
+        while self.ctx.clock.time < int(self.ctx.observation_data[:,0].size): 
+
             self.particles = self.integrator.propagate(self.particles,self.ctx)
-            weights = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
+            
+            '''With this new aggregation approach the observations must be explicitly zeroed, see Callables in Abstract.Algorithm'''
+            if(self.ctx.clock.time % self.ctx.estimation_scale == 0): 
+                self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
         
-            mean_state.append((np.mean([particle.state for particle in self.particles],axis=0)))
-            print(np.mean([particle.state for particle in self.particles],axis=0))
+                self.particles = self.resampler.resample(ctx=self.ctx,particleArray=self.particles)
 
-
-            if(1/np.sum(weights**2) < self.ctx.particle_count/4): 
-                self.particles = self.resampler.resample(weights=(weights),ctx=self.ctx,particleArray=self.particles)
-                print("Resampled")
-            self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
-
+                self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
+                self.zero_observations()
+                print(self.ctx.clock.time)
+            
             '''output updates, not part of the main algorithm'''
             beta.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)],axis=0))
+            print(beta[-1])
+            print(np.mean([particle.param['gamma'] for _,particle in enumerate(self.particles)]))
+            
+            mean_state.append((np.mean([particle.state for particle in self.particles],axis=0)))
             self.ctx.clock.tick()
-            print(f"iteration: {self.ctx.clock.time}")  
+            #print(f"iteration: {self.ctx.clock.time}")  
 
         plt.title("Beta Over Time")
         plt.xlabel("Time(days)")

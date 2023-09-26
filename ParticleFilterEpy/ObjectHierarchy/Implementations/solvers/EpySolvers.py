@@ -7,11 +7,12 @@ from epymorph.context import Compartments, SimDType
 from epymorph.geo import Geo
 from epymorph.ipm.ipm import Ipm, IpmBuilder
 from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
-from typing import List,Tuple
+from typing import List,Tuple,Dict
 import numpy as np
 import multiprocessing as mp
 
 class EpymorphSolver(Integrator): 
+
 
     def propagate(self, particleArray: List[Particle], ctx: Context) -> List[Particle]:
 

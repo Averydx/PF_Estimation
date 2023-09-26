@@ -3,7 +3,7 @@ from typing import List,Dict
 import numpy as np
 from numpy.typing import NDArray
 #from utilities.utility import multivariate_normal
-from ObjectHierarchy.utilities.Utils import Context,Particle,multivariate_normal,timing
+from ObjectHierarchy.utilities.Utils import Context,Particle,multivariate_normal,timing,log_cov,log_mean
 from epymorph.util import check_ndarray
 
 
@@ -16,16 +16,24 @@ class ParamOnlyMultivariate(Perturb):
            raise Exception("covariance matrix is not defined -please define the covariance as an scalar in this object's constructor, it will be manually broadcast to a diagional array")
 
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
-        cov = np.diag([self.hyperparameters['cov'] for _ in range(len(particleArray[0].param['beta']))])
-        A = np.linalg.cholesky(cov)
-        # for i,_ in enumerate(particleArray): 
-        #     for estimated_param in ctx.estimated_params:
-        #         perturbed = np.log(particleArray[i].param[estimated_param])
-        #         perturbed = np.exp(multivariate_normal(perturbed,A))
-        #         particleArray[i].param[estimated_param] = perturbed
+        for i,_ in enumerate(particleArray): 
+            
 
-        args = [(ctx.estimated_params,A,particle) for particle in particleArray]
-        particleArray = ctx.process_pool.starmap(self.sub,args)
+            for estimated_param in ctx.estimated_params:
+                
+                cov = np.diag([self.hyperparameters['cov'] for _ in range(len(particleArray[0].param[estimated_param]))])
+
+                if(estimated_param == 'beta'): 
+                    perturbed = np.log(particleArray[i].param[estimated_param])
+                    perturbed = np.exp(ctx.rng.multivariate_normal(perturbed,cov))
+                else: 
+                    perturbed = (particleArray[i].param[estimated_param])
+                    perturbed = np.abs(ctx.rng.multivariate_normal(perturbed,cov))
+                
+                particleArray[i].param[estimated_param] = perturbed
+
+        # args = [(ctx.estimated_params,A,particle) for particle in particleArray]
+        # particleArray = ctx.process_pool.starmap(self.sub,args)
 
         
 
@@ -35,6 +43,8 @@ class ParamOnlyMultivariate(Perturb):
         for estimated_param in estimated_params:
             perturbed = np.log(particle.param[estimated_param])
             perturbed = np.exp(multivariate_normal(perturbed,A))
+                
+
             particle.param[estimated_param] = perturbed
 
         return particle
