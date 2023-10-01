@@ -70,7 +70,7 @@ plt.plot(beta_cos)
 plt.plot(beta_cos_2)
 plt.plot(beta_cos_3)
 plt.plot(beta_cos_4)
-# plt.plot(beta_cos_5)
+plt.plot(beta_cos_5)
 # plt.show()
 
 betas = np.zeros((343,4))

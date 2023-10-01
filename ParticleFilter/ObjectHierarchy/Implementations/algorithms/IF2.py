@@ -6,6 +6,7 @@ from ObjectHierarchy.Abstract.Integrator import Integrator
 from ObjectHierarchy.Abstract.Resampler import Resampler
 from ObjectHierarchy.utilities.Output import Output
 from ObjectHierarchy.utilities.Utils import Context, Particle, RunInfo,variance,quantiles
+import pandas as pd
 
 
 '''Implementation of the IF2 algorithm from Ionides et. al.'''
@@ -34,29 +35,36 @@ class IF2(Algorithm):
         self.output = Output(observation_data=info.observation_data)
         self.output_flags = info.output_flags
 
-
+        observations = []
         for m in range(0,self.context.additional_hyperparameters['m']): 
 
             '''operations of M loop are setting the value of m in the hyperparameters, randomly perturbing the params and reseting the state and observation values'''
-            self.particles = self.perturb.randomly_perturb(self.context,self.particles)
+            #self.particles = self.perturb.randomly_perturb(self.context,self.particles)
             self.M_iteration_reset()
 
             while self.context.clock.time < len(info.observation_data):
-                self.particles = self.perturb.randomly_perturb(self.context,self.particles)
-                self.particles = self.integrator.propagate(self.particles,self.context)
+                if(not(m == self.context.additional_hyperparameters['m'] -1)): 
+                
+                    self.particles = self.perturb.randomly_perturb(self.context,self.particles)
+                    self.particles = self.integrator.propagate(self.particles,self.context)
 
-                weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
-                self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
+                    weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
+                    self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
+                
+                else: 
+                    self.particles = self.integrator.propagate(self.particles,self.context)
 
                 '''output updates, not part of the main algorithm'''
-                if(m == self.context.additional_hyperparameters['m'] -2): 
+                if(m == self.context.additional_hyperparameters['m'] -1): 
                     self.output.beta_qtls[:,self.context.clock.time] = quantiles([particle.param['beta'] for _,particle in enumerate(self.particles)])
                     self.output.observation_qtls[:,self.context.clock.time] = quantiles([particle.observation for _,particle in enumerate(self.particles)])
                     self.output.average_beta[self.context.clock.time] = np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)])
+                    observations.append(np.mean([particle.observation for particle in self.particles]))
+                    print(observations[-1])
 
 
-
-
+                df = pd.DataFrame(observations)
+                df.to_csv('./data_sets/IF2_observations.csv')
                 #print(f"variance of beta: {variance(np.array([particle.param['beta'] for particle in self.particles]))}")
                 self.context.clock.tick()
                 #print(f"M:{m} N: {self.context.clock.time}")

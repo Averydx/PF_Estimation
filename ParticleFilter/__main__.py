@@ -14,17 +14,17 @@ def beta(t):
     betaMax1=0.1
     theta=0
 
-    return 0.1+betaMax1*(1.0-np.cos(theta+t/7/52*2*np.pi))  
-    #return 0.1
+     
+    return 0.108
 
 
 def main():
     
-    params = {"beta":beta,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0}
+    params = {"beta":beta,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":5.0}
     
     initial_state = np.array([7000000 ,70000,0,0]) 
 
-    time_series = 343
+    time_series = 223
 
     start = time.time() 
 
@@ -32,7 +32,7 @@ def main():
     args = parse()
 
     if args.simulate_data: 
-       GenerateSimData(params,initial_state,time_series,hospitalization=True)
+       GenerateSimData(params,initial_state,time_series,hospitalization=True,noise=False)
        file = "./data_sets/beta_test.csv"
     else: 
         file = args.file
@@ -59,7 +59,7 @@ def main():
                                   population=args.population,
                                   num_particles=num_particles, 
                                   hyperparamters={"sigma1":0.2,"sigma2":0.1,"alpha":0.1},
-                                  static_parameters={"gamma":0.1,"eta":0.1,"L":90.0,"D":10.0,"hosp":5.3}, 
+                                  static_parameters={"gamma":0.01,"eta":0.01,"L":90.0,"D":10.0,"hosp":5.3}, 
                                   init_seed_percent=initial_seed,
                                   filePath=file,
                                   ipm=IPM.SIRH,

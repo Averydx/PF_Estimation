@@ -141,7 +141,7 @@ class LogMultivariatePoissonResample(Resampler):
 
 
 #TODO Debug invalid weights in divide 
-    def compute_weights(self, observation: NDArray, particleArray:List[Particle]) -> NDArray[np.float_]:
+    def compute_weights(self, observation: NDArray, particleArray:List[Particle]) -> float:
         p_obvs = np.array([particle.observation for particle in particleArray])
         weights = np.zeros(len(p_obvs))
         for i,particle in enumerate(particleArray):
@@ -150,8 +150,10 @@ class LogMultivariatePoissonResample(Resampler):
 
         weights = weights-np.max(weights)
         #weights = log_norm(weights)
+        
         weights = np.exp(weights)
         weights /= np.sum(weights)
+
         for j in range(len(particleArray)):  
             if(weights[j] == 0):
                 weights[j] = 0
@@ -162,12 +164,11 @@ class LogMultivariatePoissonResample(Resampler):
 
             particleArray[j].weight = weights[j]
 
-        
-
-   
+        print(weights)        
 
         
-        return np.squeeze(weights)
+
+        return weights
     
     def resample(self, ctx: Context,particleArray:List[Particle]) -> List[Particle]:
         
@@ -213,6 +214,7 @@ class LogNormalResample(Resampler):
 
         weights = weights-np.max(weights)
         #weights = log_norm(weights)
+       
         weights = np.exp(weights)
         for j in range(len(particleArray)):  
             if(weights[j] == 0):

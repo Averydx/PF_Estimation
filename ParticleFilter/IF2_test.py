@@ -21,7 +21,7 @@ resample = PoissonResample()
 algo = IF2(integrator=solver,
                          perturb=perturb,
                          resampler=resample,
-                         context=Context(population=7_000_000,state_size=4,additional_hyperparameters={"m":200},particle_count=1000))
+                         context=Context(population=7_000_000,state_size=4,additional_hyperparameters={"m":10},particle_count=1000))
 algo.initialize({"beta":-1,"gamma":0.1,"eta":0.1,"hosp":5.3,"L":90.0,"D":10.0})
 
 

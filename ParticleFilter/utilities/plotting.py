@@ -30,7 +30,7 @@ def plot(out:Output,graph:int):
             t = np.linspace(0,out.time,num=out.time) 
             plt.figure(figsize=(10,10))
             plt.plot(t,out.sim_obvs) 
-        
+
             plt.plot(t,out.observations[:out.time],color = "black",zorder=12) 
 
             plt.title("Average Daily Infections") 

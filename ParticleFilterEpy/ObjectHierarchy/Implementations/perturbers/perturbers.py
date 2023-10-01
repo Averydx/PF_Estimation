@@ -18,7 +18,6 @@ class ParamOnlyMultivariate(Perturb):
     def randomly_perturb(self,ctx:Context,particleArray:List[Particle]):
         for i,_ in enumerate(particleArray): 
             
-
             for estimated_param in ctx.estimated_params:
                 
                 cov = np.diag([self.hyperparameters['cov'] for _ in range(len(particleArray[0].param[estimated_param]))])
