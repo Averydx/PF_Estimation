@@ -30,7 +30,6 @@ class Resampler(ABC):
         indexes = np.arange(ctx.particle_count)
         new_particle_indexes = ctx.rng.choice(a=indexes, size=ctx.particle_count, replace=True, p=weights)
 
-        print(new_particle_indexes)
 
         particleCopy = particleArray.copy()
         for i in range(len(particleArray)): 

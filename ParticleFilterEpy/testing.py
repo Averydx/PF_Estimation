@@ -8,7 +8,7 @@ from epymorph.ipm.ipm import Ipm, IpmBuilder
 from epymorph.movement.basic import BasicEngine
 from epymorph.movement.engine import Movement, MovementBuilder, MovementEngine
 from epymorph.data import geo_library,ipm_library,mm_library
-from ObjectHierarchy.geo.dual_pop import load
+from ObjectHierarchy.geo.single_pop import load
 import numpy as np
 
 
@@ -23,9 +23,9 @@ if __name__ == '__main__':
     perturb = ParamOnlyMultivariate(params={"cov":0.01})
     resample = LogMultivariatePoissonResample()
 
-    data = get_observations(filePath="./data_sets/epy_inc.csv")
+    data = get_observations(filePath="./data_sets/FLU_HOSPITALIZATIONS.csv")
     data = np.delete(data,0,1)
-    data = data.T
+    data = data
     algo = Epymorph_PF(integrator=solver,
                             perturb=perturb,
                             resampler=resample,
@@ -33,14 +33,15 @@ if __name__ == '__main__':
                                         particle_count=1000,
                                         seed_size=0.01,
                                         geo=load(),
-                                        ipm_builder=ipm_library['sirs'](),
+                                        ipm_builder=ipm_library['sirh'](),
                                         mvm_builder=mm_library['pei'](),
                                         estimation_scale = 1,
                                         rng = np.random.default_rng()))
 
 
 
-    algo.initialize({"beta":np.array([-1,-1]),"gamma":np.array([0.25]),"xi":np.array([0.1]),"theta":np.array([0.1]),"move_control":np.array([0.9])});
+    algo.initialize({"beta":np.array([-1]),"gamma":np.array([0.1]),"xi":np.array([0.1]),"theta":np.array([0.1]),"move_control":np.array([0.9]),'hospitalization_rate': np.array([0.001]),
+        'hospitalization_duration':np.array([5.3])})
     out = algo.run()
 
 
