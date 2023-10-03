@@ -40,7 +40,6 @@ class Epymorph_PF(Algorithm):
             '''With this new aggregation approach the observations must be explicitly zeroed, see Callables in Abstract.Algorithm'''
             if(self.ctx.clock.time % self.ctx.estimation_scale == 0): 
                 LL_t = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
-                LL+= np.log(LL_t)
                 self.particles = self.resampler.resample(ctx=self.ctx,particleArray=self.particles)
 
                 self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
