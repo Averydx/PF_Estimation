@@ -35,7 +35,7 @@ if __name__ == '__main__':
                                         geo=geo_library['pei'](),
                                         ipm_builder=ipm_library['sirs'](),
                                         mvm_builder=mm_library['pei'](),
-                                        estimation_scale = 1,
+                                        estimation_scale = 3,
                                         rng = np.random.default_rng()))
 
 
