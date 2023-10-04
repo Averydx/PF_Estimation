@@ -10,7 +10,7 @@ from epymorph.simulation import Simulation
 from epymorph.run import plot_event,plot_pop
 from epymorph.util import stridesum
 import matplotlib.pyplot as plt
-from ParticleFilterEpy.ObjectHierarchy.geo.quad_pop import load
+from ParticleFilterEpy.ObjectHierarchy.geo.dual_pop import load
 import pandas as pd
 
 # Note: the 'library' dictionaries contain functions which load the named component,
@@ -73,18 +73,18 @@ plt.plot(beta_cos_4)
 plt.plot(beta_cos_5)
 # plt.show()
 
-betas = np.zeros((343,4))
+betas = np.zeros((343,6))
 
 betas[:,0] = beta_cos
 betas[:,1] = beta_cos_2
 betas[:,2] = beta_cos_3
 betas[:,3] = beta_cos_4
-# betas[:,4] = beta_cos_3
-# betas[:,5] = beta_cos_5
+betas[:,4] = beta_cos_3
+betas[:,5] = beta_cos_5
 
 
 sim = Simulation(
-    geo=load(),
+    geo=geo_library['pei'](),
     ipm_builder=ipm_library['sirs'](),
     mvm_builder=mm_library['pei']()
 )
@@ -100,7 +100,7 @@ out = sim.run(
         'immunity_duration': 90.0,
     },
     start_date=date(2015, 1, 1),
-    duration_days=343,
+    duration_days=150,
     initializer=partial(single_location, location=0, seed_size=10_000),
     rng=np.random.default_rng(1)
 )

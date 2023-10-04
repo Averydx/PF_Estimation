@@ -1,6 +1,6 @@
 from ObjectHierarchy.utilities.Utils import Particle,Context
 from ObjectHierarchy.Abstract.Resampler import Resampler
-from ObjectHierarchy.utilities.Utils import variance,log_norm
+from ObjectHierarchy.utilities.Utils import variance,log_norm,jacob
 from scipy.stats import poisson,nbinom,norm,multivariate_normal
 from typing import List
 import numpy as np
@@ -149,52 +149,44 @@ class LogMultivariatePoissonResample(Resampler):
                 weights[i] += (self.likelihood(observation=observation[j],particle_observations=particle.observation[j]))
 
         weights = weights-np.max(weights)
-        #weights = log_norm(weights)
+        weights = log_norm(weights)
+        # weights = np.exp(weights)
+
+        # for j in range(len(particleArray)):  
+        #     if(weights[j] == 0):
+        #         weights[j] = 10**-300 
+        #     elif(np.isnan(weights[j])):
+        #         weights[j] = 10**-300
+        #     elif(np.isinf(weights[j])):
+        #         weights[j] = 10**-300
+
+        # weights /= np.sum(weights)
         
-        weights = np.exp(weights)
-        weights /= np.sum(weights)
-
-        for j in range(len(particleArray)):  
-            if(weights[j] == 0):
-                weights[j] = 0
-            elif(np.isnan(weights[j])):
-                weights[j] = 0
-            elif(np.isinf(weights[j])):
-                weights[j] = 0
-
-            particleArray[j].weight = weights[j]
-
-        print(weights)        
-
-        
-
         return weights
     
-    def resample(self, ctx: Context,particleArray:List[Particle]) -> List[Particle]:
+    def resample(self, ctx: Context,particleArray:List[Particle],weights:NDArray) -> List[Particle]:
         
-        # log_cdf = np.zeros(ctx.particle_count)
-        # log_cdf[0] = weights[0]
-        # for j in range(1,ctx.particle_count): 
-        #     log_cdf[j] = max(weights[j],log_cdf[j-1]) + np.log(1 + np.exp(-1*np.abs(log_cdf[j-1] - weights[j])))
+        log_cdf = jacob(weights)
+        
+        i = 0
+        indices = np.zeros(ctx.particle_count)
+        u = ctx.rng.uniform(0,1/ctx.particle_count)
+        for j in range(0,ctx.particle_count): 
+            r = np.log(u + 1/ctx.particle_count * j)
+            while r > log_cdf[i]: 
+                i += 1
+            indices[j] = i
 
-        # i = 0
-        # indices = np.zeros(ctx.particle_count)
-        # u = np.zeros(ctx.particle_count)
-        # u[0] = ctx.rng.uniform(0,1/ctx.particle_count)
-        # for j in range(0,ctx.particle_count): 
-        #     u[j] = np.log(u[0] + 1/ctx.particle_count * j)
-        #     while u[j] > log_cdf[i]: 
-        #         i += 1
-        #     indices[j] = i
-
-        # indices=indices.astype(int)
-        # particleCopy = particleArray.copy()
-        # for i in range(len(particleArray)): 
-        #     particleArray[i] = Particle(particleCopy[indices[i]].param.copy(),particleCopy[indices[i]].state.copy(),particleCopy[indices[i]].observation)
+        indices=indices.astype(int)
+        particleCopy = particleArray.copy()
+        for i in range(len(particleArray)): 
+            particleArray[i] = Particle(particleCopy[indices[i]].param.copy(),particleCopy[indices[i]].state.copy(),particleCopy[indices[i]].observation)
 
         '''Resample generally calls out to the super to do the actual resampling, although a custom resampler can override the base implementation'''
-        return super().resample(ctx,particleArray)
+        #return super().resample(ctx=ctx,particleArray=particleArray,weights=weights)
+        return particleArray
     
+
 '''It's possible a distribution that has a variance parameter might work more nicely for our purposes in the multivariate case'''
 class LogNormalResample(Resampler): 
     cov: int

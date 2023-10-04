@@ -39,9 +39,8 @@ class Epymorph_PF(Algorithm):
             self.particles = self.integrator.propagate(self.particles,self.ctx)
             '''With this new aggregation approach the observations must be explicitly zeroed, see Callables in Abstract.Algorithm'''
             if(self.ctx.clock.time % self.ctx.estimation_scale == 0): 
-                LL_t = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
-                LL+= np.log(LL_t)
-                self.particles = self.resampler.resample(ctx=self.ctx,particleArray=self.particles)
+                weights = self.resampler.compute_weights(self.ctx.observation_data[self.ctx.clock.time,:],self.particles)
+                self.particles = self.resampler.resample(ctx=self.ctx,particleArray=self.particles,weights=weights)
 
                 self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
                 
@@ -51,10 +50,8 @@ class Epymorph_PF(Algorithm):
             '''output updates, not part of the main algorithm'''
             beta.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)],axis=0))
             
-            print(beta[-1])
-            
             self.ctx.clock.tick()
-            #print(f"iteration: {self.ctx.clock.time}")  
+            print(f"iteration: {self.ctx.clock.time}")  
 
         plt.title("Beta Over Time")
         plt.xlabel("Time(days)")

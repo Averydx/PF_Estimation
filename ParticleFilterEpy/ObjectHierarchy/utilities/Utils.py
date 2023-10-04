@@ -49,7 +49,6 @@ class Particle:
     param: Dict
     state: NDArray
     observation: NDArray
-    weight: float
 
 '''Metadata about the algorithm'''
 @dataclass(frozen=True)
@@ -93,17 +92,17 @@ def variance(items:NDArray[np.float_])->float:
 
 '''The jacobian logarithm, used in log likelihood normalization and resampling processes
 δ will be an array of log-probabilities '''
-def jacob(δ:NDArray)->float:
+def jacob(δ:NDArray)->NDArray:
     n = len(δ)
     Δ = np.zeros(n)
     Δ[0] = δ[0]
     for i in range(1,n):
         Δ[i] = max(δ[i],Δ[i-1]) + np.log(1 + np.exp(-1*np.abs(δ[i] - Δ[i-1])))
-    return(Δ[n-1])
+    return(Δ)
 
 '''normalizes the probability space using the jacobian logarithm as defined in jacob() '''
 def log_norm(log_weights:NDArray): 
-    norm = (jacob(log_weights))
+    norm = (jacob(log_weights)[-1])
     log_weights -= norm
     return log_weights
 

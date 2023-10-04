@@ -87,7 +87,7 @@ class Algorithm(ABC):
                 state.append(substate)
 
             state = np.array(state)      
-            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=np.array([]),weight = 1/self.ctx.particle_count))
+            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=np.array([])))
             self.zero_observations(); 
 
             

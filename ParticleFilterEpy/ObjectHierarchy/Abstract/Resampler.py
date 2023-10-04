@@ -24,16 +24,15 @@ class Resampler(ABC):
         pass
 
     @abstractmethod
-    def resample(self,ctx:Context,particleArray:List[Particle]) ->List[Particle]: #Resamples based on the weights returned from compute_weights and returns the new indexes
+    def resample(self,ctx:Context,particleArray:List[Particle],weights:NDArray) ->List[Particle]: #Resamples based on the weights returned from compute_weights and returns the new indexes
         
-        weights = [particle.weight for particle in particleArray]
         indexes = np.arange(ctx.particle_count)
         new_particle_indexes = ctx.rng.choice(a=indexes, size=ctx.particle_count, replace=True, p=weights)
 
 
         particleCopy = particleArray.copy()
         for i in range(len(particleArray)): 
-            particleArray[i] = Particle(particleCopy[new_particle_indexes[i]].param.copy(),particleCopy[new_particle_indexes[i]].state.copy(),particleCopy[new_particle_indexes[i]].observation,particleCopy[new_particle_indexes[i]].weight.copy())
+            particleArray[i] = Particle(particleCopy[new_particle_indexes[i]].param.copy(),particleCopy[new_particle_indexes[i]].state.copy(),particleCopy[new_particle_indexes[i]].observation)
 
 
         
