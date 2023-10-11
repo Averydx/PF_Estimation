@@ -55,15 +55,18 @@ class NormResample(Resampler):
 '''Resampler using the negative binomial probability mass function to compute the weights'''
 class NBResample(Resampler):
 
-    var: float
 
-    def __init__(self,var) -> None:
+    def __init__(self) -> None:
         super().__init__(likelihood_NB)
-        self.var = var
 
     def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
 
-        weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray],self.var))
+        weights = np.zeros(len(particleArray))
+        for i in range(len(particleArray)): 
+            weights[i] = self.likelihood(np.round(observation),particleArray[i].observation,particleArray[i].dispersion)
+
+
+        #weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray],[particle.dispersion for particle in particleArray]))
 
 
         for j in range(len(particleArray)):  

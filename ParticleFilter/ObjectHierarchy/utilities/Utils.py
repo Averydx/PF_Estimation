@@ -32,6 +32,7 @@ class Particle:
     param: Dict
     state: NDArray
     observation: NDArray
+    dispersion:float
 
 '''Meta data about the algorithm'''
 @dataclass(frozen=True)

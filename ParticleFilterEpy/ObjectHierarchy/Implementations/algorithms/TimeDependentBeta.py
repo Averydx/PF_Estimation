@@ -37,6 +37,7 @@ class TimeDependentAlgo(Algorithm):
     @timing
     def run(self,info:RunInfo) ->Output:
 
+        dispersion = []
 
         '''field initializations for Output'''
         self.output = Output(observation_data=info.observation_data)
@@ -47,9 +48,10 @@ class TimeDependentAlgo(Algorithm):
             self.particles = self.integrator.propagate(self.particles,self.context)
 
             weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
-            print(weights)
+
             self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
 
+            
             self.particles = self.perturb.randomly_perturb(ctx=self.context,particleArray=self.particles)
 
             '''output updates, not part of the main algorithm'''
@@ -60,7 +62,7 @@ class TimeDependentAlgo(Algorithm):
             
 
             self.context.clock.tick()
-            #print(f"iteration: {self.context.clock.time}")
+            print(f"iteration: {self.context.clock.time}")
         plt.show()
         self.clean_up()
         return self.output

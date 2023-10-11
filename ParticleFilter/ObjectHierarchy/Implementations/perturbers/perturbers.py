@@ -49,6 +49,9 @@ class MultivariatePerturbations(Perturb):
 
             particleArray[i].state = perturbed[0:ctx.state_size]
             particleArray[i].param['beta'] = perturbed[-1]
+
+            particleArray[i].dispersion = np.exp(ctx.rng.normal(np.log(particleArray[i].dispersion)))
+            
             
 
 

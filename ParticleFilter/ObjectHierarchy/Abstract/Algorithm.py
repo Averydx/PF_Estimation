@@ -42,8 +42,9 @@ class Algorithm(ABC):
 
         for _ in range(self.context.particle_count): 
             initial_infected = self.context.rng.uniform(0,self.context.seed_size*self.context.population)
+            intial_dispersion = self.context.rng.uniform(20.,30.); 
             state = concatenate((array([self.context.population-initial_infected,initial_infected]),[0 for _ in range(self.context.state_size-2)])) #SIRH model 
-            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=array([0])))
+            self.particles.append(Particle(param=params.copy(),state=state.copy(),observation=array([0]),dispersion=intial_dispersion))
 
         
 
