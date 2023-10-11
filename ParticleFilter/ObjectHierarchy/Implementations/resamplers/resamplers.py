@@ -10,11 +10,8 @@ from numpy.typing import NDArray
 def likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDArray: 
         return poisson.pmf(k=observation,mu=particle_observations)
 
-def likelihood_NB(observation,particle_observations:NDArray[np.int_],var:float)->NDArray: 
-    X = np.zeros(len(particle_observations))
-
-    for i,P_obv in enumerate(particle_observations): 
-       X[i] = nbinom.pmf(observation,var,var/(P_obv + var))
+def likelihood_NB(observation,particle_observation:NDArray[np.int_],var:float)->NDArray: 
+    X = nbinom.pmf(observation, n = (particle_observation)**2 / (var  - particle_observation), p = particle_observation / var)
 
     return X
 
