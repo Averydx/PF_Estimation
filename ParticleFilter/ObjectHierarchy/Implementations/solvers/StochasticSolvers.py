@@ -11,6 +11,7 @@ import numpy as np
 
 
 class PoissonSolver(Integrator): 
+    '''This class uses the tau-leaping? method to compute the next state of the particle and the observations'''
     def propagate(self, particleArray: List[Particle],ctx:Context) -> List[Particle]:
         for j,particle in enumerate(particleArray): 
             S,I,R,H = particle.state
@@ -23,6 +24,7 @@ class PoissonSolver(Integrator):
             
 
             state = np.zeros_like(particle.state)
+            '''Enforces the minimum will be 0'''
             state[0] = max(0.,S-new_infected + new_susceptibles)
             state[1] = max(0.,I + new_infected - (new_hospitalized + new_recovered_from_I))
             state[2] = max(0.,R + new_recovered_from_H + new_recovered_from_I - new_susceptibles)
@@ -34,6 +36,7 @@ class PoissonSolver(Integrator):
         return particleArray
     
 class EpymorphSolver(Integrator): 
+    '''Test code for integrating with EpyMoPRH, not in use currently'''
     def propagate(self, particleArray: List[Particle], ctx: Context,tick_index) -> List[Particle]:
         geo=geo_library['pei']()
         ipm_builder = ipm_library['sirs']()

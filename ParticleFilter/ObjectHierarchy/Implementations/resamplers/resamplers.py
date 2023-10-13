@@ -11,6 +11,8 @@ def likelihood_poisson(observation,particle_observations:NDArray[np.int_])->NDAr
         return poisson.pmf(k=observation,mu=particle_observations)
 
 def likelihood_NB(observation,particle_observation:NDArray[np.int_],var:float)->NDArray: 
+    '''a wrapper for the pmf of the negative binomial distribution, modified to use the parameterization aobut a known mean 
+    and variance, r and p solved accordingly'''
     X = nbinom.pmf(observation, n = (particle_observation)**2 / (var  - particle_observation), p = particle_observation / var)
 
     return X
@@ -54,18 +56,21 @@ class NBResample(Resampler):
 
 
     def __init__(self) -> None:
+        '''constructor calls back to the super() passing in the relevant likelihood function'''
         super().__init__(likelihood_NB)
 
     def compute_weights(self, observation: int, particleArray:List[Particle]) -> NDArray[np.float_]:
+        '''Computes the weights according to the negative binomial distribution'''
 
-        weights = np.zeros(len(particleArray))
+        weights = np.zeros(len(particleArray))#initialize weights as an array of zeros
         for i in range(len(particleArray)): 
+            '''iterate over the particles and call the likelihood function for each one '''
             weights[i] = self.likelihood(np.round(observation),particleArray[i].observation,particleArray[i].dispersion)
 
 
         #weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray],[particle.dispersion for particle in particleArray]))
 
-
+        '''This loop sets all weights that are out of bounds to a very small non-zero number'''
         for j in range(len(particleArray)):  
             if(weights[j] == 0):
                 weights[j] = 10**-300 
@@ -75,12 +80,13 @@ class NBResample(Resampler):
                 weights[j] = 10**-300
 
 
-        weights = weights/np.sum(weights)
+        weights = weights/np.sum(weights)#normalize the weights
 
         
         return np.squeeze(weights)
     
     def resample(self, weights: NDArray[np.float_], ctx: Context,particleArray:List[Particle]) -> List[Particle]:
+        '''calls back to the base implementation in the parent'''
         return super().resample(weights, ctx,particleArray)
 
 

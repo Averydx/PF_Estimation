@@ -15,7 +15,7 @@ import numpy as np
 from ObjectHierarchy.utilities.Utils import Context
 
 class TimeDependentAlgo(Algorithm): 
-
+    '''This algorithm is being used in for numerical tests'''
     def __init__(self, integrator: Integrator, perturb: Perturb, resampler: Resampler,context:Context) -> None:
         super().__init__(integrator, perturb, resampler,context)
         
@@ -42,13 +42,15 @@ class TimeDependentAlgo(Algorithm):
         self.output = Output(observation_data=info.observation_data)
         self.output_flags = info.output_flags
 
+        '''Create a list to store the dispersion param-hacked in, theres probably a better solution here'''
         dispersion = []; 
 
         while self.context.clock.time < len(info.observation_data): 
-
+            '''This loop contains all the algorithm steps '''
+            
             self.particles = self.integrator.propagate(self.particles,self.context)
             
-            
+            '''hacked in solution for forecasting, more robust solution could be useful'''
             if(self.context.clock.time < len(info.observation_data)): 
                 weights = self.resampler.compute_weights(info.observation_data[self.context.clock.time],self.particles)
                 self.particles = self.resampler.resample(weights=weights,ctx=self.context,particleArray=self.particles)
