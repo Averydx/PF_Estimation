@@ -30,12 +30,12 @@ if __name__ == '__main__':
                             perturb=perturb,
                             resampler=resample,
                             ctx=Context(observation_data=data,
-                                        particle_count=5000,
+                                        particle_count=1000,
                                         seed_size=0.01,
                                         geo=geo_library['pei'](),
                                         ipm_builder=ipm_library['sirs'](),
                                         mvm_builder=mm_library['pei'](),
-                                        estimation_scale = 3,
+                                        estimation_scale = 1,
                                         rng = np.random.default_rng()))
 
 

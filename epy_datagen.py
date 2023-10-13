@@ -100,7 +100,7 @@ out = sim.run(
         'immunity_duration': 90.0,
     },
     start_date=date(2015, 1, 1),
-    duration_days=150,
+    duration_days=num_days,
     initializer=partial(single_location, location=0, seed_size=10_000),
     rng=np.random.default_rng(1)
 )
