@@ -29,10 +29,10 @@ class Clock:
 '''The basic particle class'''
 @dataclass
 class Particle: 
-    param: Dict
-    state: NDArray
-    observation: NDArray
-    dispersion:float
+    param: Dict #a dictionary of parameters pertaining to the model of interest
+    state: NDArray #underlying simulated state information
+    observation: NDArray #the current observation of the particle
+    dispersion:float #particles now contain a dispersion parameter that can be estimated along with model parameters
 
 '''Meta data about the algorithm'''
 @dataclass(frozen=True)

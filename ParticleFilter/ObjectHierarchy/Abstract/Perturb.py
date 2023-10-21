@@ -3,7 +3,7 @@ from typing import Dict,List
 from ObjectHierarchy.utilities.Utils import Particle,Context
 
 class Perturb(ABC): 
-    hyperparameters: Dict
+    hyperparameters: Dict #A dictionary of perturbation parameters
 
     def __init__ (self,hyper_params:Dict)-> None: 
         self.hyperparameters = hyper_params

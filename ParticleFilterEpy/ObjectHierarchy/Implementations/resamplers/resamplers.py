@@ -150,7 +150,7 @@ class LogMultivariatePoissonResample(Resampler):
 
         weights = weights-np.max(weights)
         weights = log_norm(weights)
-        # weights = np.exp(weights)
+        #weights = np.exp(weights)
 
         # for j in range(len(particleArray)):  
         #     if(weights[j] == 0):

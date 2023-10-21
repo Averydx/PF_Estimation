@@ -2,6 +2,7 @@ from ObjectHierarchy.Implementations.algorithms.TimeDependentBeta import *
 from ObjectHierarchy.utilities.plotting import plot
 from ObjectHierarchy.utilities.Utils import RunInfo
 from ObjectHierarchy.Implementations.solvers.DeterministicSolvers import EulerSolver
+from ObjectHierarchy.Implementations.solvers.StochasticSolvers import PoissonSolver
 from ObjectHierarchy.Implementations.perturbers.perturbers import MultivariatePerturbations
 from ObjectHierarchy.Implementations.resamplers.resamplers import PoissonResample,NormResample,NBResample
 import numpy as np
@@ -16,6 +17,8 @@ np.set_printoptions(suppress=True)
 # euler = Euler()
 solver = EulerSolver()
 perturb = MultivariatePerturbations(params={"sigma1":0.2,"sigma2":0.1})
+solver = PoissonSolver()
+perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.1})
 resample = NBResample()
 
 algo = TimeDependentAlgo(integrator=solver,
