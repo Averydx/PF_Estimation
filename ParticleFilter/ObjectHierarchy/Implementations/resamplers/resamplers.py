@@ -60,7 +60,7 @@ class NBResample(Resampler):
 
         weights = np.zeros(len(particleArray))
         for i in range(len(particleArray)): 
-            weights[i] = self.likelihood(np.round(observation),particleArray[i].observation,particleArray[i].dispersion)
+            weights[i] = self.likelihood(np.round(observation),particleArray[i].observation,particleArray[i].dispersion**2)
 
 
         #weights = np.array(self.likelihood(np.round(observation),[particle.observation for particle in particleArray],[particle.dispersion for particle in particleArray]))

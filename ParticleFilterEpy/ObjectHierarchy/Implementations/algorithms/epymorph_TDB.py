@@ -14,6 +14,7 @@ import matplotlib.pyplot as plt
 from matplotlib.cm import plasma
 import multiprocessing as mp
 import numpy as np
+import pandas as pd
 
 
 
@@ -44,11 +45,13 @@ class Epymorph_PF(Algorithm):
 
                 self.particles = self.perturb.randomly_perturb(ctx=self.ctx,particleArray=self.particles)
                 
+                observations.append(np.mean([particle.observation for particle in self.particles],axis=0))
                 self.zero_observations()
                 print(self.ctx.clock.time)
             
             '''output updates, not part of the main algorithm'''
             beta.append(np.mean([particle.param['beta'] for _,particle in enumerate(self.particles)],axis=0))
+            
             
             self.ctx.clock.tick()
             print(f"iteration: {self.ctx.clock.time}")  
@@ -60,6 +63,10 @@ class Epymorph_PF(Algorithm):
         plt.plot(beta)
         print(f"Log Likelihood: {LL}");
         plt.show()
+
+
+        df = pd.DataFrame(beta)
+        df.to_csv('./data_sets/betas.csv')
 
 
 

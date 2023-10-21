@@ -37,8 +37,6 @@ class TimeDependentAlgo(Algorithm):
     @timing
     def run(self,info:RunInfo) ->Output:
 
-        dispersion = []
-
         '''field initializations for Output'''
         self.output = Output(observation_data=info.observation_data)
         self.output_flags = info.output_flags

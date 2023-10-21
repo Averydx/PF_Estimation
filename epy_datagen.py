@@ -71,7 +71,17 @@ plt.plot(beta_cos_2)
 plt.plot(beta_cos_3)
 plt.plot(beta_cos_4)
 plt.plot(beta_cos_5)
-# plt.show()
+betas = pd.DataFrame(pd.read_csv('./data_sets/betas.csv')).to_numpy()
+betas = np.delete(betas,0,1)
+betas = betas.T
+
+for beta in range(6): 
+    plt.plot(betas[beta,:],alpha=0.5)
+
+plt.title("Simulated Betas Overlaid with Model Output")
+plt.xlabel("Time(Days)")
+plt.ylabel("Value of Beta")
+plt.show()
 
 betas = np.zeros((343,6))
 
@@ -116,6 +126,26 @@ incidence = np.array(incidence)
 df = pd.DataFrame(incidence)
 df.to_csv('./data_sets/epy_inc.csv')
 
-plot_event(out,0)
+print(np.shape(incidence))
+
+df = pd.read_csv('./data_sets/observations.csv')
+
+df = df.to_numpy()
+
+df = np.delete(df,0,1)
+df = df.T
+
+for node in range(6):
+    plt.plot(incidence[node,:],label=f"node: {node}")
+
+for node in range(6): 
+    plt.plot(df[node,:],alpha=0.5)
+
+plt.title("Simulated Observations Overlaid with Model Output")
+plt.xlabel("Time(Days)")
+plt.legend(loc="upper right")
+plt.show()
+
+#plot_event(out,0)
 
 
