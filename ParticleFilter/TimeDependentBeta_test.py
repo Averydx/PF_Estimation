@@ -16,7 +16,7 @@ real_beta = np.delete(real_beta,0,1)
 np.set_printoptions(suppress=True)
 # euler = Euler()
 solver = PoissonSolver()
-perturb = MultivariatePerturbations(params={"sigma1":0.1,"sigma2":0.1})
+perturb = MultivariatePerturbations(params={"sigma1":0.01,"sigma2":0.1})
 resample = NBResample()
 
 algo = TimeDependentAlgo(integrator=solver,
